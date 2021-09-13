@@ -1,0 +1,100 @@
+Quick Ref for Descq
+===================
+for more help look at help_descq.pdf
+------------------------------------
+
+Searches:
+	Type in a search request and hit Enter
+
+Save a URL:
+    Type, paste, or drag & drop the URL into
+    the entry box and hit Enter or click ■
+
+Save text in Clipboard:
+    Type sc into the entry box and hit Enter
+    or click ■, or just click ■ if entry box
+    is empty.
+
+Other Commands:
+	x	   exit the program
+	es	   edit serv.txt
+	eh	   edit hist.txt
+	ec	   edit clip.txt
+	eu    edit urls.txt
+	ee    edit editor.txt
+	eq    edit search.txt
+	help	edit help.txt (this file)
+	list	dialog box listing saved urls
+	hist	dialog box listing save search texts
+	cap   toggle the window caption bar
+	top   toggle the window level
+	winset   save current window size and position in winmet.txt
+	
+   Up & Down arrow keys scroll through last 10 commands
+   Esc key clears entry field
+
+Create aliases for in serv.txt file:
+
+	news,	https://microsoftnews.msn.com &
+	reboot,reboot
+	htop,	sakura -t "htop" -c 150 -r 45 -x htop &
+
+
+Submit multiple commands or searches delimited with "|"
+
+Execute apps installed and in system path with "$appname"
+where $ can be $, @, or >
+
+Create service alias in serv.txt ("L:" commands):
+
+	m,Google Maps,https://www.google.com/maps/search/
+
+Files at /usr/local/descq-data/
+
+    clip.txt    holds all saved clipboard text (commands: sc, ec)
+    editor.txt  holds the name of your editor
+    search.txt  holds the search query engine URL
+    help.txt    this file
+    hist.txt    holds search history
+    serv.txt    holds "." and "?:" commands
+    urls.txt    holds saved urls
+    winmet.txt  holds window metrics
+
+SEARCH ENGINE
+
+Descq uses the DuckDuckGo search engine as default.
+Edit "search.txt" (ee command) to change it to
+some other URL such as:
+    https://www.google.com/search?q=
+    https://duckduckgo.com/?q=
+    https://www.bing.com/search?q=
+    https://scholar.google.com/scholar?q=
+    https://search.yahoo.com/search?p=
+
+CONSIDER USING DUCKDUCKGO SEARCH ENGINE
+
+With DuckDuclGo hundreds of "Bang" commands will be available to you.
+Here are a few.
+--- DDG BANG ---
+    Google Maps | !m ...
+    Google Search | !g ...
+    Amazon  | !a ...
+    Images  | !gimg !pics ...
+    Php     | !php ...
+    YouTube | !ytus ...
+    Golang  | !golang !godoc ...
+    Python  | !py3k !py ...
+    StackOverflow | !so !sof !ov !ddso
+    MDN | !mdn ...
+    List of Bangs | !bang
+-------------------------------------
+
+TO USE descq IN A SHELL
+	Make sure place descq in the system path
+	Only commands in the serv.txt file
+	and Internet searches will work from
+	the command line.
+	Type "descq list" to print the serv.txt
+	file to console.
+
+END
