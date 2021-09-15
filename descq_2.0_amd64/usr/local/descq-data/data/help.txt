@@ -26,10 +26,11 @@ Other Commands:
 	help	edit help.txt (this file)
 	list	dialog box listing saved urls
 	hist	dialog box listing save search texts
+	serv    dialog box listing my commands
 	cap   	toggle the window caption bar
 	top   	toggle the window level
 	winset  save current window size and position in winmet.txt
-	
+
    Up & Down arrow keys scroll through last 10 commands
    Esc key clears entry field
 
