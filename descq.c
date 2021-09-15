@@ -214,11 +214,8 @@ int cmdline = 0;  // 1 is command line, 0 is GUI
 int rsp = 0;
 int g_win_level = 0;
 char descq_path[128];
-char url[BUFFER2];
-// command history butter
-char hline[10][BUFFER1] = {""};  // hold 10 last search items
-int hpoint = 0;  // index for hline array user navigation
-int hlast = 0;  // index for "last" entry in hline array
+// action history buff
+char g_last_entry[128] = {0};  // save user's last command only
 
 
 // Add a seach text to hist.txt file
@@ -594,15 +591,8 @@ void process_entry(char *out_str) {
     int w_width;
     int w_height;
 
-      // copy command into hline array[hlast]
-     // set hpoint to hlast
-    // increment hlast to next available element
-    strcpy(hline[hlast], out_str);  // store command text for last command
-    hpoint = hlast;
-    hlast++;
-    if (hlast > 9) {
-        hlast = 0;
-    }
+
+    strcpy(g_last_entry, out_str);  // copy command into g_last_entry
 
     if (equalsignorecase(out_str, "list")) {        // list urls
         displayListDlg("urls");
@@ -724,6 +714,7 @@ void on_dlg_listbox_row_activated(GtkListBox *oList, GtkListBoxRow *oRow) {
     GtkWidget *bin;
     char listdata[BUFFER2];
     char *ptr;  // pointer used with listdata
+    char url[BUFFER2];
 
     bin = gtk_bin_get_child(GTK_BIN(oRow));
     strcpy(listdata, gtk_label_get_text(GTK_LABEL(bin)));
@@ -778,29 +769,12 @@ _Bool on_window1_key_press_event(GtkWidget *w, GdkEvent *e) {
     //printf("%d\n", keyval);
 
     if (keyval == 65364) {  // DOWN ARROW
-        if (hpoint == 0) {
-            return TRUE;
-            // // clear entry field
-            // gtk_entry_set_text(GTK_ENTRY(g_entry), "");
-            // printf("%d => %d\n", keyval, hpoint);
-            // return TRUE;
-        } else {
-            hpoint--;
-            gtk_entry_set_text(GTK_ENTRY(g_entry), hline[hpoint]);
-            return TRUE;
-        }
+        gtk_entry_set_text(GTK_ENTRY(g_entry), g_last_entry);
+        return TRUE;
     }
-    if (keyval == 65362) {  // UP ARROW
-        // increment hist
-        hpoint++;
-        if (hpoint > 9) {
-            hpoint = 0;
-        }
-        if (equals(hline[hpoint], "")) {
-            hpoint = 0;
-        }
 
-        gtk_entry_set_text(GTK_ENTRY(g_entry), hline[hpoint]);
+    if (keyval == 65362) {  // UP ARROW
+        gtk_entry_set_text(GTK_ENTRY(g_entry), g_last_entry);
         return TRUE;
     }
 
