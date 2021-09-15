@@ -1,0 +1,19 @@
+
+# if [ "$1" = configure ]; then
+#          if command -v install-docs >/dev/null 2>&1; then
+#            install-docs -i /usr/share/doc-base/<document-id>
+#          fi
+#        fi
+# and from the prerm script as well:
+
+#        if [ "$1" = remove -o "$1" = upgrade ]; then
+#          if command -v install-docs >/dev/null 2>&1; then
+#            install-docs -r <document-id>
+#          fi
+#        fi
+
+touch $HOME/addedTHISfileFROMpostinst
+
+if command -v install-docs >/dev/null 2>&1; then
+	install-docs -i /usr/share/doc-base/descq
+fi

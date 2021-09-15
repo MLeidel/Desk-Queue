@@ -52,7 +52,6 @@ Mkfile.old
 dkms.conf
 
 # No Relevance
-descq_2.0_amd64
 descq-data-save
 build
 recoverdata

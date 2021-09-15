@@ -1,0 +1,313 @@
+
+  <!DOCTYPE HTML>
+  <html lang='en-US'>
+  <head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <title>md/descq.md</title>
+<!--
+This source uses the 'highlight.js' library
+Copyright (c) 2006, Ivan Sagalaev
+All rights reserved.
+-->
+  <link rel='stylesheet'
+        href='//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/styles/default.min.css'>
+  <script src='//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/highlight.min.js'></script>
+
+  </head>
+  <body>
+<h1>DescQ</h1>
+<h3>for Linux</h3>
+<p>DescQ is convenient command based application and Internet query launcher
+consisting of a GUI entry field that you position on your Linux
+desktop.</p>
+<p><strong>Features:</strong>  </p>
+<ol>
+<li>Save URLs and recall them later</li>
+<li>Save text from the clipboard and access later</li>
+<li>Start an Internet search (keeps history)</li>
+<li>Set up searches for specific services (like: Google Maps...)</li>
+<li>Set up aliases to launch programs, documents, or URLs</li>
+</ol>
+<blockquote>
+<p>3 - 5 are also available at the command line.</p>
+</blockquote>
+<hr />
+<h2>Installing DescQ</h2>
+<p>download and install the .deb file.</p>
+<hr />
+<p>In case you're wondering, DescQ is written in C using Gtk3 </p>
+<hr />
+<p>You might want to configure DescQ to run on system startup.  </p>
+<hr />
+<p>To re-position use the <code>cap</code> command to toggle the<br />
+window caption bar on and off for window positioning.<br />
+The <strong><code>winset</code></strong> command saves the windows geometry and<br />
+caption status in winmet.txt.  </p>
+<p><img src="images/Deskq_cap.png" alt="caption" /><br />
+<img src="images/deskq_on_my_desktop.png" alt="desktop" /><br />
+<em>Here is DescQ positioned along side the xfce panel.</em>  </p>
+<p><strong>DescQ commands:</strong>  </p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">command/text</th>
+<th style="text-align: left;">action/description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><em>a URL</em></td>
+<td style="text-align: left;">saves URL to a list</td>
+</tr>
+<tr>
+<td style="text-align: left;"><em>search text</em></td>
+<td style="text-align: left;">starts a search in browser</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>sc</strong> or <em>action button</em></td>
+<td style="text-align: left;">saves clipboard contents</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>list</strong></td>
+<td style="text-align: left;">opens dialog with list of saved URLs</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>hist</strong></td>
+<td style="text-align: left;">opens dialog with list of saved search texts</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>cap</strong></td>
+<td style="text-align: left;">toggles window caption bar</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>winset</strong></td>
+<td style="text-align: left;">saves window size/position settings</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>eu</strong></td>
+<td style="text-align: left;">edit saved URL list (urls.lst)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>ec</strong></td>
+<td style="text-align: left;">edit saved clips text (clips.txt)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>eh</strong></td>
+<td style="text-align: left;">edit saved search history (hist.csv)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>es</strong></td>
+<td style="text-align: left;">edit custom command / services file (serv.txt)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>eq</strong></td>
+<td style="text-align: left;">edit edit the search query engine URL (search.txt)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>ee</strong></td>
+<td style="text-align: left;">edit edit the name of your text editor (editor.txt)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>top</strong></td>
+<td style="text-align: left;">toggles the window level to Top or Bottom</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>help</strong></td>
+<td style="text-align: left;">view this help</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>up arrow</strong> key</td>
+<td style="text-align: left;">recall last 10 commands or search text</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Esc</strong> key</td>
+<td style="text-align: left;">clear entry field</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><em>Use the <strong><code>hist</code></strong> command to pop up a dialog of your<br />
+saved searches. Click to search again.</em><br />
+<img src="images/historyShot.png" alt="history" title="hist" /></p>
+<h2>System commands and website directed searches</h2>
+<p>Use <strong><code>es</code></strong> to edit <code>serv.txt</code> file. </p>
+<p>The <code>serv.txt</code> file holds your aliases for<br />
+custom commands and URLs.<br />
+The entries in <code>serv.txt</code> take two forms:</p>
+<ul>
+<li>Aliases: URL links and system commands</li>
+<li>Website Directed Searches</li>
+</ul>
+<h3>Aliases</h3>
+<p>Aliases can be either URLs or system commands.  </p>
+<p>The general format is</p>
+<p><em>Alias</em>, {URL | fullpath-command-line_}  </p>
+<p>To create an alias first invent a name for<br />
+the command. The name is simply a "key" (alias)<br />
+that you will type in to launch the command.</p>
+<h4>examples from a serv.txt file:</h4>
+<pre><code class="language-text">    git,https://github.com
+    dev,dev.sh
+    shutdown,  shutdown now
+    reboot,reboot
+    drive, https://drive.google.com</code></pre>
+<p>To perform these commands in DescQ you would type in<br />
+the alias and hit Enter or click the action button.<br />
+Deskq will match on <em>leading</em> characters or substrings<br />
+of your alias.<br />
+<em>Note: if you create an alias in serv.txt and then<br />
+mistype it when using it, the mistyped alias will<br />
+be treated as a <strong>search</strong> and launch it in the<br />
+browser.</em></p>
+<p>Using the example aliases above:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">typed</th>
+<th style="text-align: left;">resulting action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>git</code></td>
+<td style="text-align: left;">opens github.com in your browser</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>dev</code></td>
+<td style="text-align: left;">executes your shell script to ... ?</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>shut</code></td>
+<td style="text-align: left;">shuts down your machine</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>shutdo</code></td>
+<td style="text-align: left;">shuts down your machine</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>sh</code></td>
+<td style="text-align: left;">shuts down your machine</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>reboot</code></td>
+<td style="text-align: left;">reboots your machine</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>reb</code></td>
+<td style="text-align: left;">reboots your machine</td>
+</tr>
+</tbody>
+</table>
+<p>It helps to create your commands in "serv.txt"<br />
+in assending order which should allow for unique substrings<br />
+as your commands become familiar from use.</p>
+<hr />
+<p>Searches and/or aliases can be combined by delimiting<br />
+with "|" eg. <strong>git|dev|someothercommand|...</strong>  </p>
+<p>Perform three searches with one command:<br />
+<strong>dogs|cats|tadpoles</strong></p>
+<hr />
+<p>Directly execute an app installed on your system<br />
+and in the system path like this:</p>
+<p><code>$app</code></p>
+<p>For example: <code>$gimp</code></p>
+<p>"$" can be "$" or "@" or "&gt;"</p>
+<hr />
+<h3>Website directed searches</h3>
+<p>These are URLs that may have a ?querystring after<br />
+the domain and path part.  In <code>serv.txt</code> the<br />
+first character of each line must begin with<br />
+a single letter (a-z, 1-0).  </p>
+<p>The general format is:</p>
+<p><em>?,name,website-URL + query-string...</em><br />
+where ? = a unique letter a-z, A-Z, 0-9</p>
+<p><em><strong>You may have to experiment with each website to learn<br />
+how it formats their search querystring.</strong></em>  </p>
+<h4>Some examples:</h4>
+<p><code>a,Amazon,https://smile.amazon.com/s/ref=nb_sb_noss_1?field-keywords=</code></p>
+<p><code>i,Google Images,http://images.google.com/images?q=</code> </p>
+<p><code>p,Php,http://php.net/manual-lookup.php?pattern=</code> </p>
+<p><code>m,Google Maps,https://www.google.com/maps/search/</code></p>
+<p><img src="images/servicex1.png" alt="services" /></p>
+<p>For example: <strong>m:arlington, TX</strong></p>
+<p>It may take a little work to discover some of these<br />
+querystrings but many do exist. DeskQ comes with<br />
+several already set up.</p>
+<h3>Save and recall URLs and text clippings.</h3>
+<p>To save a URL copy or type it into DescQ and hit Enter.<br />
+To view and re-open saved URLs type <strong><code>list</code></strong> into DescQ and hit Enter.  </p>
+<p>To save text from your system clipboard just type <strong><code>sc</code></strong><br />
+or click the action button with the entry field empty.  </p>
+<p>To view/edit text you've saved just type <strong><code>ec</code></strong> Enter.<br />
+Your text editor will pop-up with all of your clips.</p>
+<h4>Specify the text editor</h4>
+<p>The "e_" commands for DeskQ require a simple text editor.<br />
+Put the name of your installed text editor into the first<br />
+line of the <code>editor.txt</code> file. It comes with <code>gedit</code> in the file.</p>
+<ul>
+<li><em>examples:</em><br />
+<code>subl</code><br />
+<code>gedit</code><br />
+<code>xed</code><br />
+<code>atom</code><br />
+<code>gedit</code><br />
+<code>whatever</code>  </li>
+</ul>
+<h4>Specify the Search Engine</h4>
+<p>The search engine query string is set to DDG<br />
+by default. You can change it by editing<br />
+the <code>search.txt</code> file to the query string<br />
+for your favorite search engine.  </p>
+<p>One of the advantages of DDG is its<br />
+BANG query feature. Checkout<br />
+<a href="https://duckduckgo.com/bang">https://duckduckgo.com/bang</a><br />
+to find out how it works. Very cool!</p>
+<h4>List of DescQ System Files</h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>clip.txt</code></td>
+<td>text file of clippings</td>
+</tr>
+<tr>
+<td><code>descq</code></td>
+<td>Linux executable</td>
+</tr>
+<tr>
+<td><code>hist.txt</code></td>
+<td>text file of search history</td>
+</tr>
+<tr>
+<td><code>serv.txt</code></td>
+<td>text file of $ commands and special querys</td>
+</tr>
+<tr>
+<td><code>winmet.txt</code></td>
+<td>window geometry ...</td>
+</tr>
+<tr>
+<td><code>editor.txt</code></td>
+<td>name of your text editor program</td>
+</tr>
+<tr>
+<td><code>urls.txt</code></td>
+<td>text file of saved URLs</td>
+</tr>
+<tr>
+<td><code>search.txt</code></td>
+<td>querystring to search with you favorite search engine</td>
+</tr>
+</tbody>
+</table>
+<h4>end</h4>
+  <script>hljs.initHighlightingOnLoad();</script>
+  </body>
+  </html>
+  

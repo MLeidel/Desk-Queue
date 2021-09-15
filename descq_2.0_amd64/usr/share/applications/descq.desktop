@@ -1,0 +1,10 @@
+
+[Desktop Entry]
+Name=DescQ
+Version=1.0
+Comment=Desktop command utility for Debian
+Exec=/usr/local/bin/descq
+Terminal=false
+Icon=/usr/share/icons/system-search.png
+Type=Application
+Categories=Utility;

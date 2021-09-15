@@ -1,0 +1,30 @@
+---- serv.txt ----
+brave,  brave-browser
+calculat,gnome-calculator &
+calendar,https://calendar.google.com/
+contacts,https://contacts.google.com
+docs,   https://docs.google.com
+drive,  https://drive.google.com/
+edit,   xed &
+ff,     firefox
+gedit,  gedit &
+git,    https://github.com
+htop,   sakura -t "htop" -c 150 -r 45 -x htop &
+mso,    https://www.office.com
+news,   https://microsoftnews.msn.com
+office, https://www.office.com/?auth=1
+outlook,https://outlook.com
+reboot, reboot
+shutdown,shutdown now
+tk1,    https://anzeljg.github.io/rin2/book2/2405/docs/tkinter
+tkcolors,http://www.science.smith.edu/dftwiki/index.php/Color_Charts_for_TKinter
+youtube,https://youtube.com
+zoom,   https://us04web.zoom.us/meeting
+---- SERVICES ---- ! DO NOT DELETE THIS LINE !
+a,Amazon,https://smile.amazon.com/s/ref=nb_sb_noss_1?field-keywords=
+b,B4X,https://www.b4x.com/android/forum/
+i,Google Images,http://images.google.com/images?q=
+m,Google Maps,https://www.google.com/maps/search/
+p,Php,http://php.net/manual-lookup.php?pattern=
+w,Wikipedia,https://en.wikipedia.org/w/index.php?title=Special:Search\&profile=default\&fulltext=Search\&search=
+y,YouTube,https://www.youtube.com/results?search_query=

@@ -1,0 +1,12 @@
+Document: descq
+Title: DescQ User Guide
+Author: Michael Leidel
+Abstract: This manual describes what DescQ is
+ and how it can be used to
+ launch commands and Internet searches
+ on Debian systems.
+Section: Apps/Utility
+
+Format: HTML
+Index: /usr/share/doc/descq/descq.html
+Files: /usr/share/doc/descq/descq.html

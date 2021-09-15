@@ -252,13 +252,13 @@ void show_message(char pmsg[64], char smsg[64]) {
     gtk_dialog_run(GTK_DIALOG(g_messagebox));
 }
 
-/*  Continued parsing of request and
+void commands(char *out_str) {
+    /*  Continued parsing of request and
         Command-Line Section:
         descq was executed in a shell with
-        arguments that were either a .dot
+        arguments that were either a
         command or an internet search.
-*/
-void commands(char *out_str) {
+    */
     FILE *fh;
     char action[BUFFER2] = {0};
     char line[BUFFER2] = {0};
@@ -514,14 +514,20 @@ void displayListDlg(char * target) {
         strcpy(filename, "data/urls.txt");
         gtk_window_set_title(GTK_WINDOW(g_dialog_box), "Saved URL List");
     } else {
-        strcpy(filename, "data/hist.txt");
-        gtk_window_set_title(GTK_WINDOW(g_dialog_box), "Saved Search Queries");
+        if (equals(target, "serv")) {
+            strcpy(filename, "data/serv.txt");
+            gtk_window_set_title(GTK_WINDOW(g_dialog_box), "Your Commands");
+        } else {
+            strcpy(filename, "data/hist.txt");
+            gtk_window_set_title(GTK_WINDOW(g_dialog_box), "Saved Search Queries");
+        }
     }
 
     fh = open_for_read(filename);
     while(1) {
         fgets(line, BUFFER2, fh);
         if (feof(fh)) break;
+        if (strstr(line, "-- SERVICES --")) break;  // only in serv.txt (hopefully!)
         removen(line);  // remove newline character
         g_label = gtk_label_new (line);
         gtk_label_set_xalign (GTK_LABEL(g_label), 0.0);
@@ -603,6 +609,9 @@ void process_entry(char *out_str) {
 
     } else if (equalsignorecase(out_str, "hist")) { // list history
         displayListDlg("hist");
+
+    } else if (equalsignorecase(out_str, "serv")) { // list commands from serv.txt
+        displayListDlg("serv");
 
     } else if (startswith(out_str, "http")) {       // saves URL to urls.txt
         write_url(out_str);
@@ -714,30 +723,36 @@ void on_entry_activate(GtkEntry *entry) {
 void on_dlg_listbox_row_activated(GtkListBox *oList, GtkListBoxRow *oRow) {
     GtkWidget *bin;
     char listdata[BUFFER2];
+    char *ptr;  // pointer used with listdata
 
     bin = gtk_bin_get_child(GTK_BIN(oRow));
     strcpy(listdata, gtk_label_get_text(GTK_LABEL(bin)));
     gtk_clipboard_set_text(g_clipboard, listdata, -1);
-    if (startswith(listdata, "http")) {
+    if (startswith(listdata, "http")) {  // LIST item
         strcpy(url, "xdg-open ");
         strcat(url, listdata);
         strcat(url, " &");  // do not wait for system to finish
         system(url);
         gtk_widget_hide (g_dialog_box);
-    } else {
-        listdata[strlen(listdata) - 14] = '\0';  // cut off the date
-        printf("%s\n", listdata);
-        if (listdata[1] == ':') {
-            gtk_entry_set_text(GTK_ENTRY(g_entry), listdata);
-            on_entry_activate(GTK_ENTRY(g_entry));
-        } else {
-            strcpy(listdata, urlencode(listdata));
-            strcpy(url, "xdg-open ");
-            strcat(url, g_sea_engine);
-            strcat(url, "\"");
-            strcat(url, listdata);  // quotes necessary incase of embeded quote
-            strcat(url, "\"");
-            system(url);
+    } else {  // SERV item
+        if (ptr = strchr(listdata, ',')) {
+            *ptr = '\0';  // replace ',' with end of string \0 for line
+            commands(listdata);
+        } else {  // HIST item
+            listdata[strlen(listdata) - 14] = '\0';  // cut off the date
+            printf("%s\n", listdata);
+            if (listdata[1] == ':') {
+                gtk_entry_set_text(GTK_ENTRY(g_entry), listdata);
+                on_entry_activate(GTK_ENTRY(g_entry));
+            } else {
+                strcpy(listdata, urlencode(listdata));
+                strcpy(url, "xdg-open ");
+                strcat(url, g_sea_engine);
+                strcat(url, "\"");
+                strcat(url, listdata);  // quotes necessary incase of embeded quote
+                strcat(url, "\"");
+                system(url);
+            }
         }
     }
 }

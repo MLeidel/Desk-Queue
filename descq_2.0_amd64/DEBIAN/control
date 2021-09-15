@@ -1,0 +1,8 @@
+
+Package: descq
+Version: 1.0
+Architecture: amd64
+Priority: optional
+Maintainer: Michael Leidel <mike.leidel@gmail.com>
+Description: Desktop command center, URL saver,
+	Internet search bar and more. GTK-3.
