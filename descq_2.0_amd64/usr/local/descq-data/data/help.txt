@@ -16,21 +16,21 @@ Save text in Clipboard:
     is empty.
 
 Other Commands:
-	x	exit the program
-	es	edit serv.txt
-	eh	edit hist.txt
-	ec	edit clip.txt
-	eu    	edit urls.txt
-	ee    	edit editor.txt
-	eq    	edit search.txt
+	x	   exit the program
+	es	   edit serv.txt
+	eh	   edit hist.txt
+	ec	   edit clip.txt
+	eu    edit urls.txt
+	ee    edit editor.txt
+	eq    edit search.txt
 	help	edit help.txt (this file)
 	list	dialog box listing saved urls
 	hist	dialog box listing save search texts
-	serv    dialog box listing my commands
-	cap   	toggle the window caption bar
-	top   	toggle the window level
-	winset  save current window size and position in winmet.txt
-
+	serv    dialog box listing my commands serv.txt
+	cap   toggle the window caption bar
+	top   toggle the window level
+	winset   save current window size and position in winmet.txt
+	
    Up & Down arrow keys scroll through last 10 commands
    Esc key clears entry field
 
