@@ -1,6 +1,6 @@
 # descq
 ### for Linux
-
+#### Streamline Workflow
 descq is convenient command based application and Internet query launcher
 consisting of a GUI entry field that you position on your Linux
 desktop.
