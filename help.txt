@@ -30,15 +30,9 @@ Other Commands:
 	cap   toggle the window caption bar
 	top   toggle the window level
 	winset   save current window size and position in winmet.txt
-	
+
    Up & Down arrow keys scroll through last 10 commands
    Esc key clears entry field
-
-Create aliases for in serv.txt file:
-
-	news,	https://microsoftnews.msn.com &
-	reboot,reboot
-	htop,	sakura -t "htop" -c 150 -r 45 -x htop &
 
 
 Submit multiple commands or searches delimited with "|"
@@ -46,9 +40,17 @@ Submit multiple commands or searches delimited with "|"
 Execute apps installed and in system path with "$appname"
 where $ can be $, @, or >
 
+
+Create aliases for in serv.txt file:
+
+	news,	https://microsoftnews.msn.com &
+	reboot,reboot
+	htop,	sakura -t "htop" -c 150 -r 45 -x htop &
+
 Create service alias in serv.txt ("L:" commands):
 
 	m,Google Maps,https://www.google.com/maps/search/
+
 
 Files at /usr/local/descq-data/
 

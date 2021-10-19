@@ -313,7 +313,7 @@ void commands(char *out_str) {
             if (startswith(line, action)) {
                 write_history(out_str);
                 removen(line);  // remove newline character
-                count = fields(line, ",");   // stringalt.h
+                count = fields(line, ",");   // myclib.h
                 strcpy(line, "xdg-open ");  // build the command ...
                 strcat(line, _fields[2]);  // should return count = 3 (0,1,2)
                 // urlencode the search text
@@ -676,7 +676,7 @@ void process_entry(char *out_str) {
         system(action);
 
     } else {  // continue on to check for other possible commands
-        printf("end of else ifs");
+
         commands(out_str);  // these actions are shared by the command line process
     }
 }
