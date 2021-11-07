@@ -390,6 +390,7 @@ int main(int argc, char *argv[])
     int             w_left;
     int             w_width;
     int             w_height;
+    int             w_decor;
     int             count = 0;
     char            line[BUFFER2];
 
@@ -450,12 +451,13 @@ int main(int argc, char *argv[])
     w_top       = atoi(_fields[1]);
     w_width     = atoi(_fields[2]);
     w_height    = atoi(_fields[3]);
+    w_decor     = atoi(_fields[4]);
 
     gtk_widget_show(window);
     gtk_window_move(GTK_WINDOW(g_wnd), w_left, w_top);  // set metrics ...
     gtk_window_resize(GTK_WINDOW(g_wnd), w_width, w_height);
     // caption bar always off at startup
-    gtk_window_set_decorated (GTK_WINDOW(g_wnd), 0);  // turn off caption bar
+    gtk_window_set_decorated (GTK_WINDOW(g_wnd), w_decor);  // caption bar
 
     // download urls.lst
     // get_urls();
@@ -666,7 +668,11 @@ void process_entry(char *out_str) {
         gtk_window_get_position (GTK_WINDOW(g_wnd), &w_left, &w_top);
         gtk_window_get_size (GTK_WINDOW(g_wnd), &w_width, &w_height);
         fh = open_for_write("data/winmet.txt");
-        fprintf(fh, "%d,%d,%d,%d\n", w_left, w_top, w_width, w_height);
+        if (gtk_window_get_decorated(GTK_WINDOW(g_wnd))) {
+            fprintf(fh, "%d,%d,%d,%d,1\n", w_left, w_top, w_width, w_height);
+        } else {
+            fprintf(fh, "%d,%d,%d,%d,0\n", w_left, w_top, w_width, w_height);
+        }
         fclose(fh);
 
     } else if (charinx("$@>", out_str[0]) > -1) {  // run an app directly
