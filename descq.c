@@ -475,7 +475,7 @@ int main(int argc, char *argv[])
     }
 
     // window keep above other windows ("top" will toggle)
-    change_win_level();
+    // change_win_level();
 
     // load text editor name
     change_editor();
