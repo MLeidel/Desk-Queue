@@ -1,9 +1,5 @@
 Quick Ref for Descq
 ===================
-descq (DeskQ) is a desktop browser search window
-with added productivity such as clipboard archiving
-and retrieval, custom command aliasing.
-
 for more help look at help_descq.pdf
 ------------------------------------
 

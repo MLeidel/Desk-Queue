@@ -409,7 +409,7 @@ int main(int argc, char *argv[])
     if (argc > 1) {
         char cargs[128] = {0};
         int x = 0;
-        for(x=1; x<argc-1; x++) {
+        for(x=1; x<argc-1; x++) {  // concat all the args
             strcat(cargs, argv[x]);
             strcat(cargs, " ");
         }
@@ -459,9 +459,6 @@ int main(int argc, char *argv[])
     // caption bar always off at startup
     gtk_window_set_decorated (GTK_WINDOW(g_wnd), w_decor);  // caption bar
 
-    // download urls.lst
-    // get_urls();
-
     // count lines in urls.txt
     fh = open_for_read("data/urls.txt");
     while(1) {
@@ -485,8 +482,8 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-/*_______________________________________________________________________________*/
-/* ______________________________END__OF__MAIN___________________________________*/
+ /*_______________________________________________________________________________*/
+/*______________________________END__OF__MAIN____________________________________*/
 
 
 // called when window is closed
@@ -631,7 +628,7 @@ void process_entry(char *out_str) {
         strcat(action, " data/urls.txt &");
         system(action);
 
-    } else if (equalsignorecase(out_str, "help")) {        // edit help.txt
+    } else if (equalsignorecase(out_str, "help") || (equalsignorecase(out_str, "about"))) {  // edit help.txt
         strcpy(action, EDITOR);
         strcat(action, " data/help.txt &");
         int rsp = system(action);
