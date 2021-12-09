@@ -1,9 +1,9 @@
 # descq
 ### for Linux
 #### Streamline Workflow
-descq is convenient command based application and Internet query launcher
-consisting of a GUI entry field that you position on your Linux
-desktop.
+descq (DeskQ) is a GUI-Internet-search-window
+with added productivity like clipboard archiving
+and retrieval, and custom command aliasing.
 
 **Features:**
 1.  Save URLs and recall them later
@@ -20,11 +20,12 @@ download and install the .deb file.
 
 ---
 
-descq is written in C along with Gtk3
+descq is written in C including Gtk3
 
 ---
 
-You might want to configure descq to run on system startup.
+You might want to configure descq to run on system startup
+or link it to a hotkey.
 
 ---
 
