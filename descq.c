@@ -599,7 +599,7 @@ void process_entry(char *out_str) {
     } else if (equalsignorecase(out_str, "hist")) { // list history
         displayListDlg("hist");
 
-    } else if (equalsignorecase(out_str, "serv")) { // list commands from serv.txt
+    } else if (equalsignorecase(out_str, "serv") || (equals(out_str, "?"))) { // list commands from serv.txt
         displayListDlg("serv");
 
     } else if (startswith(out_str, "http")) {       // saves URL to urls.txt

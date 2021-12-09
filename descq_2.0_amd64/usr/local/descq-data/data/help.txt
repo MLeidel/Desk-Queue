@@ -1,8 +1,8 @@
 Quick Ref for Descq
 ===================
-descq (DeskQ) is a desktop browser search window
+descq (DeskQ) is a GUI-Internet-search-window
 with added productivity such as clipboard archiving
-and retrieval, custom command aliasing.
+and retrieval, and custom command aliasing.
 
 for more help look at help_descq.pdf
 ------------------------------------
@@ -20,20 +20,20 @@ Save text in Clipboard:
     is empty.
 
 Other Commands:
-	x	   exit the program
-	es	   edit serv.txt
-	eh	   edit hist.txt
-	ec	   edit clip.txt
+	x	  exit the program
+	es	  edit serv.txt
+	eh	  edit hist.txt
+	ec	  edit clip.txt
 	eu    edit urls.txt
 	ee    edit editor.txt
 	eq    edit search.txt
-	help	edit help.txt (this file)
-	list	dialog box listing saved urls
-	hist	dialog box listing save search texts
-	serv    dialog box listing my commands serv.txt
+	help  edit help.txt (this file)
+	list  dialog box listing saved urls
+	hist  dialog box listing save search texts
+	serv  dialog box listing my commands serv.txt
 	cap   toggle the window caption bar
 	top   toggle the window level
-	winset   save current window size and position in winmet.txt
+	winset save current window size and position in winmet.txt
 
    Up & Down arrow keys scroll through last 10 commands
    Esc key clears entry field
