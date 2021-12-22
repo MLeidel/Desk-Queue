@@ -44,6 +44,8 @@ Submit multiple commands or searches delimited with "|"
 Execute apps installed and in system path with "$appname"
 where $ can be $, @, or >
 
+Evaluate math expresions (uses system 'bc') with a leading "="...
+=35^3 / 2.14
 
 Create aliases for in serv.txt file:
 
