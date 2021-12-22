@@ -142,6 +142,14 @@ The entries in `serv.txt` take two forms:
   "$" can be "$" or "@" or ">"
 
   ---
+  
+  Evaluate math expressions using a leading "="  
+  followed by the expression:
+  
+  `=24.5^3 / 2.2`
+  
+  ---
+  
 ### Website directed searches
   These are URLs that may have a ?querystring after
   the domain and path part.  In `serv.txt` the
