@@ -168,7 +168,6 @@ char* glade_xml = "\
 <property name=\"can_focus\">True</property>\n\
 <property name=\"max_length\">1024</property>\n\
 <property name=\"shadow_type\">none</property>\n\
-<property name=\"placeholder_text\" translatable=\"yes\">type help for 'help'</property>\n\
 <signal name=\"activate\" handler=\"on_entry_activate\" swapped=\"no\"/>\n\
 </object>\n\
 <packing>\n\
@@ -580,6 +579,32 @@ void on_btn_dlg_msg_close_clicked() {
     gtk_widget_hide(g_messagebox);
 }
 
+const char * get_bc_result(const char * expr) {
+    FILE *fp;
+    static char path[1024];
+    char bcxpr[1024] = {'\0'};
+
+    // format the pipe to bc
+    strcpy(bcxpr, "echo \"scale=4;");
+    strcat(bcxpr, expr);
+    strcat(bcxpr, "\" | bc");
+
+    /* Open the command for reading. */
+    fp = popen(bcxpr, "r");
+    if (fp == NULL) {
+        printf("Failed to run command\n" );
+        return "fail";
+    }
+    /* Read the output a line at a time (output it.) */
+    while (fgets(path, sizeof(path), fp) != NULL) {
+        // printf("%s", path);
+    }
+
+    /* close */
+    pclose(fp);
+    return removen(path);
+}
+
 
 void process_entry(char *out_str) {
     FILE *fh;
@@ -677,6 +702,11 @@ void process_entry(char *out_str) {
         strcat(action, " &");
         //printf("\n----> %d %s\n", charinx("$@>", out_str[0]), out_str+1);
         system(action);
+
+    } else if (out_str[0] == '=') {  // evaluate this math expression
+        strcpy(action, out_str+1);
+        const char * res = get_bc_result(action);
+        gtk_entry_set_text(GTK_ENTRY(g_entry), res);
 
     } else {  // continue on to check for other possible commands
 
