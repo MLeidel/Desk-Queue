@@ -1,8 +1,8 @@
 # descq
 ### for Linux
 #### Streamline Workflow
-descq (DeskQ) is a GUI-Internet-search-window
-with added productivity like clipboard archiving
+descq (DeskQ) is a desktop GUI-Internet-search-window  
+with added productivity like clipboard archiving  
 and retrieval, and custom command aliasing.
 
 **Features:**
