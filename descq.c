@@ -12,7 +12,7 @@ OTHER FILES:
 This is free software; see the source for copying conditions.  There is NO
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE
 */
-#include "myclib.h"
+#include "myc.h"
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
 #include <unistd.h>
@@ -294,11 +294,6 @@ void commands(char *out_str) {
         }
     }  // end while
     fclose(fh);
-    // if (cmdline == 1) {
-    //     printf("Not Found in Serv.txt:\n%s\n", out_str);
-    // } else {
-    //     show_message(out_str, "<b>Not Found in serv.txt</b>");
-    // }
 
     if (out_str[1] == ':') {  // run a service query from serv.txt
         action[0] = out_str[0];
@@ -312,9 +307,11 @@ void commands(char *out_str) {
             if (startswith(line, action)) {
                 write_history(out_str);
                 removen(line);  // remove newline character
-                count = fields(line, ",");   // myclib.h
-                strcpy(line, "xdg-open ");  // build the command ...
-                strcat(line, _fields[2]);  // should return count = 3 (0,1,2)
+                array_of_strings vars = aos_allocate(3, 1024);
+                count = aos_fields(vars, line, ",");
+                strcpy(line, "xdg-open ");     // build the command ...
+                strcat(line, vars.fields[2]); // should return count = 3 (0,1,2)
+                aos_cleanup(vars);
                 // urlencode the search text
                 strcpy(action, out_str+2);
                 strcpy(action, urlencode(action));
@@ -445,12 +442,14 @@ int main(int argc, char *argv[])
     fgets(line, 64, fh);
     fclose(fh);
     removen(line);  // remove new line character
-    fields(line, ",");
-    w_left      = atoi(_fields[0]);
-    w_top       = atoi(_fields[1]);
-    w_width     = atoi(_fields[2]);
-    w_height    = atoi(_fields[3]);
-    w_decor     = atoi(_fields[4]);
+    array_of_strings vals = aos_allocate(5, 16);
+    aos_fields(vals, line, ",");
+    w_left      = atoi(vals.fields[0]);
+    w_top       = atoi(vals.fields[1]);
+    w_width     = atoi(vals.fields[2]);
+    w_height    = atoi(vals.fields[3]);
+    w_decor     = atoi(vals.fields[4]);
+    aos_cleanup(vals);
 
     gtk_widget_show(window);
     gtk_window_move(GTK_WINDOW(g_wnd), w_left, w_top);  // set metrics ...
@@ -735,11 +734,12 @@ void on_entry_activate(GtkEntry *entry) {
         return;
     }
     // User can enter multiple commands/searches delimited by "|"
-    cnt = fields(out_str, "|");
-
+    array_of_strings coms = aos_allocate(20, 64);
+    cnt = aos_fields(coms, out_str, "|");
     for(inx = 0; inx < cnt; inx++) {
-        process_entry(_fields[inx]);
+        process_entry(coms.fields[inx]);
     }
+    aos_cleanup(coms);
 }
 
 
