@@ -1,8 +1,8 @@
 # descq
 ### for Linux
 #### Streamline Workflow
-descq (DeskQ) is a GUI-Internet-search-window
-with added productivity like clipboard archiving
+descq (DeskQ) is a desktop GUI-Internet-search-window  
+with added productivity like clipboard archiving  
 and retrieval, and custom command aliasing.
 
 **Features:**
@@ -142,6 +142,14 @@ The entries in `serv.txt` take two forms:
   "$" can be "$" or "@" or ">"
 
   ---
+  
+  Evaluate math expressions using a leading "="  
+  followed by the expression:
+  
+  `=24.5^3 / 2.2`
+  
+  ---
+  
 ### Website directed searches
   These are URLs that may have a ?querystring after
   the domain and path part.  In `serv.txt` the
