@@ -20,10 +20,10 @@ Save text in Clipboard:
     is empty.
 
 Other Commands:
-	x	  exit the program
-	es	  edit serv.txt
-	eh	  edit hist.txt
-	ec	  edit clip.txt
+	x     exit the program
+	es    edit serv.txt
+	eh    edit hist.txt
+	ec    edit clip.txt
 	eu    edit urls.txt
 	ee    edit editor.txt
 	eq    edit search.txt
@@ -33,7 +33,7 @@ Other Commands:
 	serv  dialog box listing my commands serv.txt
 	cap   toggle the window caption bar
 	top   toggle the window level
-	winset save current window size and position in winmet.txt
+	winset   save current window size and position in winmet.txt
 
    Up & Down arrow keys scroll through last 10 commands
    Esc key clears entry field
@@ -44,8 +44,8 @@ Submit multiple commands or searches delimited with "|"
 Execute apps installed and in system path with "$appname"
 where $ can be $, @, or >
 
-Evaluate math expresions (uses system 'bc') with a leading "="...
-=35^3 / 2.14
+Evaluate math expressions using a leading "="...
+=3^5 / 2.5
 
 Create aliases for in serv.txt file:
 
@@ -53,10 +53,24 @@ Create aliases for in serv.txt file:
 	reboot,reboot
 	htop,	sakura -t "htop" -c 150 -r 45 -x htop &
 
-Create service alias in serv.txt ("L:" commands):
 
+Querystring specific URL requests -
+    Create URL (service) alias in serv.txt ("L:" + query...)
+
+	Some examples might be:
 	m,Google Maps,https://www.google.com/maps/search/
-
+        p,Php,http://php.net/manual-lookup.php?pattern=
+	a,Amazon,https://smile.amazon.com/s/ref=nb_sb_noss_1?field-keywords=
+	u,URL,https://
+    
+    Note: Text from the Entry field is appended to the end of
+	the querystring:
+	
+	m:Madison Wisconsin
+	p:arrays
+	a:mini computers
+	u:example.com
+    
 
 Files at /usr/local/descq-data/
 
@@ -65,7 +79,7 @@ Files at /usr/local/descq-data/
     search.txt  holds the search query engine URL
     help.txt    this file
     hist.txt    holds search history
-    serv.txt    holds "." and "?:" commands
+    serv.txt    holds user alias commands and targeted search urls
     urls.txt    holds saved urls
     winmet.txt  holds window metrics
 
@@ -99,7 +113,7 @@ Here are a few.
 -------------------------------------
 
 TO USE descq IN A SHELL
-	Make sure place descq in the system path
+	Make sure descq is in the system path
 	Only commands in the serv.txt file
 	and Internet searches will work from
 	the command line.

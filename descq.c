@@ -227,8 +227,8 @@ void write_history(char *text) {
     while(1) {
         fgets(rec[count], BUFFER2, fh);
         if (feof(fh)) break;
-        removen(rec[count++]);  // remove newline character
-        if (count > 498) return;  // too many hist recs !!
+        rtrim(rec[count++]);  // remove newline character
+        if (count > 900) return;  // too many hist recs !!
     }
     fclose(fh);
     fh = open_for_write("data/hist.txt");
@@ -268,7 +268,7 @@ void commands(char *out_str) {
     while(1) {
         fgets(line, BUFFER2, fh);
         if (feof(fh)) break;
-        removen(line);  // remove newline character
+        rtrim(line);  // remove newline character
         ptr = strchr(line, ',');  // get pointer to the first ','
         if (ptr) {
             *ptr = '\0';  // replace ',' with end of string \0 for line
@@ -306,7 +306,7 @@ void commands(char *out_str) {
             if (feof(fh)) break;
             if (startswith(line, action)) {
                 write_history(out_str);
-                removen(line);  // remove newline character
+                rtrim(line);  // remove newline
                 array_of_strings vars = aos_allocate(3, 1024);
                 count = aos_fields(vars, line, ",");
                 strcpy(line, "xdg-open ");     // build the command ...
@@ -355,7 +355,7 @@ void change_editor() {
     FILE *fh;
     fh = open_for_read("data/editor.txt");
     fgets(g_editor, 127, fh);
-    removen(g_editor);
+    rtrim(g_editor);
     fclose(fh);
 }
 
@@ -363,7 +363,7 @@ void change_query_engine() {
     FILE *fh;
     fh = open_for_read("data/search.txt");
     fgets(g_sea_engine, 127, fh);
-    removen(g_sea_engine);
+    rtrim(g_sea_engine);
     fclose(fh);
 }
 
@@ -441,7 +441,7 @@ int main(int argc, char *argv[])
     fh = open_for_read("data/winmet.txt");
     fgets(line, 64, fh);
     fclose(fh);
-    removen(line);  // remove new line character
+    rtrim(line);  // remove new line character
     array_of_strings vals = aos_allocate(5, 16);
     aos_fields(vals, line, ",");
     w_left      = atoi(vals.fields[0]);
@@ -469,7 +469,7 @@ int main(int argc, char *argv[])
         show_message("<big>DescQ</big>", "Reached MAX URLS");
     }
 
-    // window keep above other windows ("top" will toggle)
+     // window keep above other windows ("top" will toggle)
     // change_win_level();
 
     // load text editor name
@@ -522,7 +522,7 @@ void displayListDlg(char * target) {
         fgets(line, BUFFER2, fh);
         if (feof(fh)) break;
         if (strstr(line, "-- SERVICES --")) break;  // only in serv.txt (hopefully!)
-        removen(line);  // remove newline character
+        rtrim(line);  // remove newline character
         g_label = gtk_label_new (line);
         gtk_label_set_xalign (GTK_LABEL(g_label), 0.0);
         gtk_list_box_insert(GTK_LIST_BOX(g_dlg_listbox), g_label, -1);
@@ -543,7 +543,7 @@ void write_url(char *text) {  // Save url to urls.txt file and online file
     while(1) {
         fgets(rec[count], BUFFER2, fh);
         if (feof(fh)) break;
-        removen(rec[count++]);  // remove newline character
+        rtrim(rec[count++]);  // remove newline character
         if (count > 498) return;  // too many urls !!
     }
     fclose(fh);
@@ -561,7 +561,7 @@ void save_clipboard_to_file() {
     FILE *fh;
     char *cliptxt;
 
-    cliptxt = (char *) malloc(5 * BUFFER3);  // 5MG
+    cliptxt = (char *) malloc(2 * BUFFER3);  // 2MG
 
     if (!gtk_clipboard_wait_is_text_available(g_clipboard)) {
         return;
@@ -601,7 +601,7 @@ const char * get_bc_result(const char * expr) {
 
     /* close */
     pclose(fp);
-    return removen(path);
+    return rtrim(path);
 }
 
 
@@ -734,7 +734,7 @@ void on_entry_activate(GtkEntry *entry) {
         return;
     }
     // User can enter multiple commands/searches delimited by "|"
-    array_of_strings coms = aos_allocate(20, 64);
+    array_of_strings coms = aos_allocate(20, 128);
     cnt = aos_fields(coms, out_str, "|");
     for(inx = 0; inx < cnt; inx++) {
         process_entry(coms.fields[inx]);
