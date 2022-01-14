@@ -268,6 +268,9 @@ void commands(char *out_str) {
     while(1) {
         fgets(line, BUFFER2, fh);
         if (feof(fh)) break;
+        if (startswith(line, "#")) {
+            continue;
+        }
         rtrim(line);  // remove newline character
         ptr = strchr(line, ',');  // get pointer to the first ','
         if (ptr) {

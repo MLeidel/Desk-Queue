@@ -72,10 +72,12 @@ char *strrev(char *str) {
     return str;
 }
 
+
 char *ltrim(char *s) {
     while(isspace(*s)) s++;
     return s;
 }
+
 
 char *rtrim(char *s) {
     char* back = s + strlen(s);
@@ -84,13 +86,20 @@ char *rtrim(char *s) {
     return s;
 }
 
+
 char *trim(char *s) {
     return rtrim(ltrim(s));
 }
 
-/*  replace (Haystack, Needle, Replacement, Offset, How Many)
-    start = 0 : start from beginning
-    number = 0 : replace all targets */
+
+/***
+* replace function arguments:
+* a: haystack string
+* b: needle to find
+* c: replacement string
+* start: index to start looking for needle (0 means beginning)
+* number: number of replacements to make (0 means replace all)
+***/
 char * replace (char *a, const char *b, const char *c, int start, int number) {
     static char buf[MAX_L];
     char bfa[MAX_L] = {'\0'};
@@ -149,7 +158,7 @@ typedef struct array_of_strings {
 
 array_of_strings aos_allocate(int col, int len) {
     /*  initialize variables and allocate memory to an
-        array_of_strings struct */
+        array_of_strings in array_of_strings struct */
     array_of_strings aos;
     aos.max_row = len;
     aos.max_col = col;
@@ -183,10 +192,65 @@ void aos_cleanup(array_of_strings aos) {
 
 /*================= END array_of_strings ====================*/
 
+/***
+* getfield function args:
+* s:      pointer to string literal
+* deli:   character used for delimiting fields
+* coln:   the 'column' of the field to retrieve
+* strip:  strip leading/trailing whitespace before returning field
+***/
+char * getfield(char * s, char deli, int coln, bool strip) {
+   int i;   // current parsed delimiter (',' or '\0') count
+   int j;  // current parsed column count
+   int k; // current column length
+   char *p;  // pointer to current char in haystack
+   char *t; // pointer start of current field
+   static char line[MAX_L]; // return string
+
+   i = j = k = 0;
+   p = t = s;
+
+   memset(line,0,sizeof(line));
+
+   while (true) {
+      if (*p == deli || *p == '\0') {
+         i++;
+         j = i-1;
+
+         if (j == coln) {  // is this the field wanted?
+            if (j == 0) {  // time to return field
+               strncpy(line, t, k);
+            } else {
+               if ((t - s) > strlen(s)) {
+                  // this column request is out of bounds
+                  return NULL;
+               } else {
+                  strncpy(line, t, k-1);
+               }
+            }
+            if (strip) {
+               return trim(line);
+            } else {
+               return line;
+            }
+
+
+         } else {  // reset the marker variables
+            k = 0;  // reset "length" counter
+            t = p+1; // set next field start pointer
+         }
+      }  // end if delimiter
+      p++;
+      k++;
+   }  // end while
+}    // end getfield
+
+
 bool file_exists (char *filename) {
   struct stat   buffer;
   return (stat (filename, &buffer) == 0);
 }
+
 
 FILE * open_for_read(char *fname) {
     FILE *f1;
@@ -197,6 +261,7 @@ FILE * open_for_read(char *fname) {
     return f1;
 }
 
+
 FILE * open_for_append(char *fname) {
     FILE *f1;
     if ((f1 = fopen(fname,"ab")) == NULL) {
@@ -206,6 +271,7 @@ FILE * open_for_append(char *fname) {
     return f1;
 }
 
+
 FILE * open_for_write(char *fname) {
     FILE *f1;
     if ((f1 = fopen(fname,"wb")) == NULL) {
@@ -214,6 +280,7 @@ FILE * open_for_write(char *fname) {
     }
     return f1;
 }
+
 
 void readfile(char *buffer, const char *filename) {
     FILE *f;
@@ -233,11 +300,13 @@ void readfile(char *buffer, const char *filename) {
     free(string);
 }
 
+
 char* removen(char *line) {  // see also rtrim()
     // Just want to remove very last character of a string
     line[strlen(line) - 1] = '\0';
     return line;
 }
+
 
 char* today() {
     time_t rawtime;
@@ -250,15 +319,18 @@ char* today() {
     return buffer;
 }
 
+
 bool startswith (char* base, char* str) {
     return (strstr(base, str) - base) == 0;
 }
+
 
 bool endswith (char* base, char* str) {
     int blen = strlen(base);
     int slen = strlen(str);
     return (blen >= slen) && (0 == strcmp(base + blen - slen, str));
 }
+
 
 int indexOf_shift (char* base, char* str, int startIndex) {
     int result;
@@ -280,11 +352,13 @@ int indexOf_shift (char* base, char* str, int startIndex) {
     return result;
 }
 
+
 int indexof (char* base, char* str) {
     // indexof(haystack, needle);
     // find index of substring in a string
     return indexOf_shift(base, str, 0);
 }
+
 
 int charinx(char* base, char c) {
     // indexof(haystack, needle);
@@ -293,6 +367,7 @@ int charinx(char* base, char c) {
     ctos[0] = c;
     return indexof(base, ctos);
 }
+
 
 int lastindexof (char* base, char* str) {
     int result;
@@ -378,6 +453,7 @@ char *lowercase(char *str) {
     return str;
 }
 
+
 char *uppercase(char *str) {
     int i, length = strlen(str);
 
@@ -393,13 +469,16 @@ char *uppercase(char *str) {
     return str;
 }
 
+
 bool equals(char *str1, char *str2) {
     return (strcmp(str1, str2) == 0);
 }
 
+
 bool equalsignorecase(char *str1, char *str2) {
     return (strcasecmp(str1, str2) == 0);
 }
+
 
 /*
     Is a specific named argument present
@@ -419,6 +498,7 @@ int is_arg(int ac, char **argv, char *arg) {
     }
     return 0;  // arg not present
 }
+
 
 char* urlencode(char* originalText) {
     static char encodedText[MAX_L] = {"\0"};
