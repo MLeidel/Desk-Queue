@@ -802,7 +802,12 @@ _Bool on_window1_key_press_event(GtkWidget *w, GdkEvent *e) {
     guint keyval;
 
     gdk_event_get_keyval (e, &keyval);
-    //printf("%d\n", keyval);
+    printf("%d\n", keyval);
+
+    if (keyval == 65289) {  // TAB KEY PRESSED - Process entry!
+        on_entry_activate(GTK_ENTRY(g_entry));
+        return TRUE;
+    }
 
     if (keyval == 65364) {  // DOWN ARROW
         gtk_entry_set_text(GTK_ENTRY(g_entry), g_last_entry);
