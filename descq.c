@@ -310,11 +310,11 @@ void commands(char *out_str) {
             if (startswith(line, action)) {
                 write_history(out_str);
                 rtrim(line);  // remove newline
-                array_of_strings vars = aos_allocate(3, 1024);
-                count = aos_fields(vars, line, ",");
+                csv_fields vars = csv_init_fields(3, 1024);
+                csv_get_fields(vars, line, ",");
                 strcpy(line, "xdg-open ");     // build the command ...
                 strcat(line, vars.fields[2]); // should return count = 3 (0,1,2)
-                aos_cleanup(vars);
+                csv_cleanup_fields(vars);
                 // urlencode the search text
                 strcpy(action, out_str+2);
                 strcpy(action, urlencode(action));
@@ -445,14 +445,14 @@ int main(int argc, char *argv[])
     fgets(line, 64, fh);
     fclose(fh);
     rtrim(line);  // remove new line character
-    array_of_strings vals = aos_allocate(5, 16);
-    aos_fields(vals, line, ",");
+    csv_fields vals = csv_init_fields(5, 16);
+    csv_get_fields(vals, line, ",");
     w_left      = atoi(vals.fields[0]);
     w_top       = atoi(vals.fields[1]);
     w_width     = atoi(vals.fields[2]);
     w_height    = atoi(vals.fields[3]);
     w_decor     = atoi(vals.fields[4]);
-    aos_cleanup(vals);
+    csv_cleanup_fields(vals);
 
     gtk_widget_show(window);
     gtk_window_move(GTK_WINDOW(g_wnd), w_left, w_top);  // set metrics ...
@@ -737,12 +737,12 @@ void on_entry_activate(GtkEntry *entry) {
         return;
     }
     // User can enter multiple commands/searches delimited by "|"
-    array_of_strings coms = aos_allocate(20, 128);
-    cnt = aos_fields(coms, out_str, "|");
+    csv_fields coms = csv_init_fields(20, 128);
+    cnt = csv_get_fields(coms, out_str, "|");
     for(inx = 0; inx < cnt; inx++) {
         process_entry(coms.fields[inx]);
     }
-    aos_cleanup(coms);
+    csv_cleanup_fields(coms);
 }
 
 
@@ -802,7 +802,7 @@ _Bool on_window1_key_press_event(GtkWidget *w, GdkEvent *e) {
     guint keyval;
 
     gdk_event_get_keyval (e, &keyval);
-    printf("%d\n", keyval);
+    //printf("%d\n", keyval);
 
     if (keyval == 65289) {  // TAB KEY PRESSED - Process entry!
         on_entry_activate(GTK_ENTRY(g_entry));
