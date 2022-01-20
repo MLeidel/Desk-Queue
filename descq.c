@@ -310,11 +310,11 @@ void commands(char *out_str) {
             if (startswith(line, action)) {
                 write_history(out_str);
                 rtrim(line);  // remove newline
-                csv_fields vars = csv_init_fields(3, 1024);
-                csv_get_fields(vars, line, ",");
+                clist vars = clist_init(3, 1024);
+                clist_parse(vars, line, ",");
                 strcpy(line, "xdg-open ");     // build the command ...
-                strcat(line, vars.fields[2]); // should return count = 3 (0,1,2)
-                csv_cleanup_fields(vars);
+                strcat(line, vars.get[2]); // should return count = 3 (0,1,2)
+                clist_cleanup(vars);
                 // urlencode the search text
                 strcpy(action, out_str+2);
                 strcpy(action, urlencode(action));
@@ -445,14 +445,14 @@ int main(int argc, char *argv[])
     fgets(line, 64, fh);
     fclose(fh);
     rtrim(line);  // remove new line character
-    csv_fields vals = csv_init_fields(5, 16);
-    csv_get_fields(vals, line, ",");
-    w_left      = atoi(vals.fields[0]);
-    w_top       = atoi(vals.fields[1]);
-    w_width     = atoi(vals.fields[2]);
-    w_height    = atoi(vals.fields[3]);
-    w_decor     = atoi(vals.fields[4]);
-    csv_cleanup_fields(vals);
+    clist vals = clist_init(5, 16);
+    clist_parse(vals, line, ",");
+    w_left      = atoi(vals.get[0]);
+    w_top       = atoi(vals.get[1]);
+    w_width     = atoi(vals.get[2]);
+    w_height    = atoi(vals.get[3]);
+    w_decor     = atoi(vals.get[4]);
+    clist_cleanup(vals);
 
     gtk_widget_show(window);
     gtk_window_move(GTK_WINDOW(g_wnd), w_left, w_top);  // set metrics ...
@@ -699,7 +699,7 @@ void process_entry(char *out_str) {
         }
         fclose(fh);
 
-    } else if (charinx("$@>", out_str[0]) > -1) {  // run an app directly
+    } else if (charat("$@>", out_str[0]) > -1) {  // run an app directly
         strcpy(action, out_str+1);
         strcat(action, " &");
         //printf("\n----> %d %s\n", charinx("$@>", out_str[0]), out_str+1);
@@ -737,12 +737,12 @@ void on_entry_activate(GtkEntry *entry) {
         return;
     }
     // User can enter multiple commands/searches delimited by "|"
-    csv_fields coms = csv_init_fields(20, 128);
-    cnt = csv_get_fields(coms, out_str, "|");
+    clist coms = clist_init(20, 128);
+    cnt = clist_parse(coms, out_str, "|");
     for(inx = 0; inx < cnt; inx++) {
-        process_entry(coms.fields[inx]);
+        process_entry(coms.get[inx]);
     }
-    csv_cleanup_fields(coms);
+    clist_cleanup(coms);
 }
 
 
