@@ -274,11 +274,7 @@ void commands(char *out_str) {
         ptr = strchr(line, ',');  // get pointer to the first ','
         if (ptr) {
             *ptr = '\0';  // replace ',' with end of string \0 for line
-
-            printf("++ptr 1: [%s]\n", ++ptr);  //-------------------------------------------------
-
             strcpy(action, ltrim(++ptr));  // copy trimmed string after ','
-            printf("action 1: [%s]\n", action);  //-------------------------------------------------
             if (startswith(line, out_str)) {  // find command in file
                 if (startswith(action, "http")) {  // if action is a website
                     strcpy(line, "xdg-open ");
@@ -322,7 +318,7 @@ void commands(char *out_str) {
                 strcpy(action, out_str+2);
                 strcpy(action, urlencode(action));
                 strcat(line, action);  // add search text to url query
-                printf("%s\n", line);
+                //printf("%s\n", line);
                 system(line);
                 break;
             }
@@ -622,7 +618,6 @@ void process_entry(char *out_str) {
 
 
     strcpy(g_last_entry, out_str);  // copy command into g_last_entry
-printf("out_str @ process_entry: [%s]\n", out_str);  //-----------------------------------------------
 
     if (equalsignorecase(out_str, "list")) {        // list urls
         displayListDlg("urls");
@@ -715,7 +710,6 @@ printf("out_str @ process_entry: [%s]\n", out_str);  //-------------------------
         gtk_entry_set_text(GTK_ENTRY(g_entry), res);
 
     } else {  // continue on to check for other possible commands
-        printf("out_str before commands: [%s]\n", out_str);  //-----------------------------------------------
         commands(out_str);  // these actions are shared by the command line process
     }
 }
@@ -771,7 +765,7 @@ void on_dlg_listbox_row_activated(GtkListBox *oList, GtkListBoxRow *oRow) {
             commands(listdata);
         } else {  // HIST item
             listdata[strlen(listdata) - 14] = '\0';  // cut off the date
-            printf("%s\n", listdata);
+            //printf("%s\n", listdata);
             if (listdata[1] == ':') {
                 gtk_entry_set_text(GTK_ENTRY(g_entry), listdata);
                 on_entry_activate(GTK_ENTRY(g_entry));
