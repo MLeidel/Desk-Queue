@@ -19,11 +19,12 @@ bool equals(char*, char*);
 bool equalsignorecase(char*, char*);
 bool startswith (char*, char*);
 char* chomp(char*);   // see also rtrim()
-char* cshiftleft(char*);
 char* getfield(char*, char, int, bool);
 char* replace (char*, char*, char*, size_t, int);
 char* lowercase(char*);
+char* leftof(char*, char*, int);
 char* ltrim(char*);
+char* rightof(char*, char*, int);
 char* rtrim(char*);
 char* strrev(char*);
 char* strrstr(char*, char*);
@@ -183,6 +184,30 @@ char *trim(char *s) {
     return rtrim(ltrim(s));
 }
 
+char *rightof(char *in, char *targ, int start) {
+    char *p;
+    char *s;
+
+    s = in + start;
+    p = strstr(s, targ);
+    if (p == NULL)
+        return NULL;
+    p += strlen(targ);
+    return p;  // *in remains unchanged
+}
+
+char *leftof(char *in, char *targ, int start) {
+    char *p;
+    char *s;
+
+    s = in + start;
+    p = strstr(s, targ);
+    if (p == NULL)
+        return NULL;
+    *p = '\0';
+    return s;  // *in has been modified
+}
+
 
 /***
 * replace arguments:
@@ -257,31 +282,17 @@ int replacechar(char *a, char b, char c, int start, int number) {
 }
 
 
-char * cshiftleft(char *str) {
-    /* if str is not NULL then
-     * shift all characters beginning at str+1 one left
-    */
-    if (str != NULL)
-        return strcpy(str, str+1);
-    else
-        return NULL;
-}
-
-
-/* clist: Parsing out values from a field delimited string
-csv string may include double quotes for explicit text
-',' inside double quotes are handled
+/*  clist: Parses out values from a csv string
+    that may use double quotes for explicit text.
+    Delimiters inside double quoted fields are
+    ignored.
 
 example:
 
 char * line; // some input csv string
-
 clist list = clist_init(5, 64);
-
 clist_parse(list, line, ",");  // returns nbr of cols found
-
     list.get[0] would be the first field
-
 clist_cleanup(list);  // free dynamic memory
 
 NOTE: the supplied input csv string is destroyed in the parsing
@@ -341,7 +352,7 @@ char * qmark(char * str, char delim) {
 int qunmark(char **str, int sz, char delim) {
     /* Un-hides the delimiters found within dbl quotes
        of fields now residing in the fields array/list.
-       Called from csv_get_fields.
+       Called from clist.
     */
     char **p = str;
     char *t;
@@ -354,7 +365,6 @@ int qunmark(char **str, int sz, char delim) {
                 *t = delim;
                 count++;
             }
-            if (*t == '\"') cshiftleft(t);
             t++;
         }
     }
@@ -371,7 +381,7 @@ int clist_parse(clist csvf, char *str, char *delim) {
         panic("clist_parse delimiter must be length of 1");
     }
 
-    // qmark(str, delim[0]);  // hide quoted delimiters
+    qmark(str, delim[0]);  // hide quoted delimiters
 
     while( (found = strsep(&str, delim)) != NULL ) {
         if( delim[0] == ' ' && *found == '\0' ) {  // handle ' ' delimiter
@@ -380,7 +390,7 @@ int clist_parse(clist csvf, char *str, char *delim) {
         strcpy(csvf.get[finx++], trim(found));
     }
 
-    // qunmark(csvf.get, finx, delim[0]);  // put back hidden delimiters
+    qunmark(csvf.get, finx, delim[0]);  // put back hidden delimiters
 
     return finx;
 }
@@ -418,7 +428,6 @@ int qunmark1(char *str, char delim) {
           *t = delim;
           count++;
       }
-      if (*t == '\"') cshiftleft(t);
       t++;
    }
     return count;
