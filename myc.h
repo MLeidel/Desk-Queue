@@ -167,10 +167,10 @@ char *strrev(char *str) {
 
 
 char *ltrim(char *s) {
-    while(isspace(*s)) cshiftleft(s);
-    return s;
+    char *forward = s;
+    while(isspace(*forward++));
+    return forward-1;
 }
-
 
 char *rtrim(char *s) {
     char* back = s + strlen(s);
@@ -178,7 +178,6 @@ char *rtrim(char *s) {
     *(back+1) = '\0';
     return s;
 }
-
 
 char *trim(char *s) {
     return rtrim(ltrim(s));
@@ -372,7 +371,7 @@ int clist_parse(clist csvf, char *str, char *delim) {
         panic("clist_parse delimiter must be length of 1");
     }
 
-    qmark(str, delim[0]);  // hide quoted delimiters
+    // qmark(str, delim[0]);  // hide quoted delimiters
 
     while( (found = strsep(&str, delim)) != NULL ) {
         if( delim[0] == ' ' && *found == '\0' ) {  // handle ' ' delimiter
@@ -381,7 +380,7 @@ int clist_parse(clist csvf, char *str, char *delim) {
         strcpy(csvf.get[finx++], trim(found));
     }
 
-    qunmark(csvf.get, finx, delim[0]);  // put back hidden delimiters
+    // qunmark(csvf.get, finx, delim[0]);  // put back hidden delimiters
 
     return finx;
 }
