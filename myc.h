@@ -13,10 +13,15 @@
 #include <unistd.h>
 #include <signal.h>
 #include <sys/stat.h>
+#include <dirent.h>
+#include <sys/types.h>
+#include <errno.h>
+
 
   // DECLARATIONS
 
 // STRING FUNCTIONS
+bool contains(char*, char*);
 bool endswith (char*, char*);
 bool equals(char*, char*);
 bool equalsignorecase(char*, char*);
@@ -37,24 +42,25 @@ char* trim(char*);
 char* uppercase(char*);
 char* urlencode(char*);
 int charat(char*, char);
-int countchar(char *buf, char *targ);
 int indexof (char*, char*);
 int lastcharat(char*, char);
 int lastindexof (char*, char*);
 int replacechar(char*, char, char, int);
-int strtype(char *, int);
+int strsubs(char*, char*);
+int strtype(char*, int);
 
 // ARRAY FUNCTIONS
 
-// ARRSIZE(x) THIS IS A MACRO
+    // ARRSIZE(x) THIS IS A MACRO
 
 typedef struct clist {
-    int max_row;   // max lenght of a field
-    int max_col;  // number of fields
-    char**  get; // array of fields (char arrays or strings)
+    int nbr_rows;  // maximum records (columns, fields)
+    int len_rows; // maximum length of one record (col, field)
+    char** get;  // array of fields (char arrays or strings)
 } clist;
 
 clist clist_init(int, int);
+clist clist_dir(const char*, int, bool);
 int clist_parse(clist, char*, char*);
 void clist_display(clist);
 void clist_cleanup(clist);
@@ -64,18 +70,21 @@ bool file_exists (char*);
 FILE * open_for_append(char*);
 FILE * open_for_read(char*);
 FILE * open_for_write(char*);
+int isfile(const char*);
+int pathsize(const char*, int);
 int readfile(char*, const char*);
 int writefile(char*, const char*, bool append);
 
 // DATE/TIME FUNCTIONS
-char* today();
+char* date(const char*);
 void timeout(int, void f(int));
 
 // SORTING FUNCTIONS
 void isort(int[], int);
 void ssort(char*[], int, bool);
+void dsort(double[], int);
 
-// EXTENDED STRING FUNCTIONS
+// LARGE-STRING FUNCTIONS
 
 typedef struct cstr {
     size_t length;  // allocated length
@@ -90,7 +99,6 @@ bool cstr_copy(cstr, char*);
 bool cstr_prepend(cstr, char*);
 bool cstr_insert(cstr, char*, size_t);
 void cstr_replace(cstr, char*, char*, int);
-
 /* END DECLARATIONS
 
 -----------------------------------------
@@ -105,6 +113,7 @@ char *getenv(const char *name)
 #define MAX_L 4096  // used a lot for default string lengths
 
 #define ARRSIZE(x)  (sizeof(x) / sizeof((x)[0]))
+
 
 int panic(char * msg) {
     fprintf(stderr, "myc-panic: \n%s\n", msg);
@@ -142,7 +151,9 @@ void ssort(char* arr[], int n, bool ignorecase) {
 }
 
 
-int countchar(char *buf, char *targ) {
+/* find how many substring in a string
+*/
+int strsubs(char *buf, char *targ) {
     int count = 0;
     char *tmp = buf;
     while(tmp = strstr(tmp, targ))
@@ -203,8 +214,8 @@ char *leftof(char *in, char *targ, int start) {
     static char s[MAX_L];  // work buffer
     char *p;
 
-    strcpy(s, in + start);
-    p = strstr(s, targ);
+    strcpy(s, in);
+    p = strstr(s + start, targ);
     if (p == NULL)
         return NULL;
     *p = '\0';
@@ -299,8 +310,8 @@ NOTE: to get a single field from a csv string see the field function
 */
 
 // typedef struct clist {
-//     int max_row;    // max lenght of a field
-//     int max_col;    // number of fields
+//     int nbr_rows;  // maximum records (columns, fields)
+//     int len_rows; // maximum length of one record (col, field)
 //     char ** get; // array of fields (array of strings)
 // } clist;
 
@@ -309,11 +320,11 @@ clist clist_init(int col, int len) {
         Return pointer to clist struct
      */
     clist csvf;
-    csvf.max_row = len;
-    csvf.max_col = col;
-    csvf.get = calloc(csvf.max_col, sizeof(char*));  // pointers
-    for(int x=0; x < csvf.max_col; x++) {
-        csvf.get[x] = calloc(csvf.max_row, sizeof(char));
+    csvf.len_rows = len;
+    csvf.nbr_rows = col;
+    csvf.get = calloc(csvf.nbr_rows, sizeof(char*));  // pointers
+    for(int x=0; x < csvf.nbr_rows; x++) {
+        csvf.get[x] = calloc(csvf.len_rows, sizeof(char));
     }
     return csvf;
 }
@@ -395,7 +406,7 @@ int clist_parse(clist csvf, char *str, char *delim) {
 
 void clist_display(clist csvf) {
     int x;
-    for(x=0; x < csvf.max_col; x++) {
+    for(x=0; x < csvf.nbr_rows; x++) {
         printf("%03d - [%s] \n", x, csvf.get[x]);
     }
 }
@@ -403,7 +414,7 @@ void clist_display(clist csvf) {
 void clist_cleanup(clist csvf) {
     /* free each column's data then free the column pointer's
     */
-    for(int col=0; col < csvf.max_col; col++) {
+    for(int col=0; col < csvf.nbr_rows; col++) {
         free(csvf.get[col]);
         csvf.get[col] = NULL;
     }
@@ -499,6 +510,89 @@ char * field(char *r, char * s, char deli, int coln, bool strip) {
    }  // end while
 }    // end field
 
+int isfile(const char* name)
+{
+    DIR* directory = opendir(name);
+
+    if(directory != NULL) {
+     closedir(directory);
+     return 0;
+    }
+    if(errno == ENOTDIR) {
+     return 1;
+    }
+    return -1;
+}
+
+int pathsize(const char *path, int dtype) {
+    struct dirent *de;
+    int count = 0;
+    char fpath[256];
+    DIR *dr = opendir(path);
+    if (dr == NULL)  {
+        return 0;
+    }
+    while ((de = readdir(dr)) != NULL) {
+        if (strcmp(de->d_name, ".") != 0 && strcmp(de->d_name, "..") != 0) {
+            strcpy(fpath, path);
+            strcat(fpath, de->d_name);
+            if (dtype == 0) {
+                count++;
+            } else if (dtype == 1 && isfile(fpath)) {
+                count++;
+            } else if (dtype == 2 && !isfile(fpath)) {
+                count++;
+            } else {
+                continue;
+            }
+        }
+    }
+    closedir(dr);
+    return count;
+}
+
+clist clist_dir(const char *path, int dtype, bool sort) {
+    /*
+     dir = 0 files and directories
+     dir = 1 just files
+     dir = 2 just directories
+    */
+    struct dirent *de;
+    int n = 0;
+
+    clist plst = clist_init(pathsize(path, dtype), 256);
+    DIR *dr = opendir(path);
+    char fpath[256];
+
+    if (dr == NULL)  {
+        panic("invalid path for clist_dir");
+    }
+    while ((de = readdir(dr)) != NULL)
+        if (strlen(de->d_name) < plst.len_rows) {
+            if (strcmp(de->d_name, ".") != 0 && strcmp(de->d_name, "..") != 0) {
+                strcpy(fpath, path);
+                strcat(fpath, de->d_name);
+                if (dtype == 0) {
+                    strcpy(plst.get[n++], de->d_name);
+                } else if (dtype == 1 && isfile(fpath)) {
+                    strcpy(plst.get[n++], de->d_name);
+                } else if (dtype == 2 && !isfile(fpath)) {
+                    strcpy(plst.get[n++], de->d_name);
+                } else {
+                    continue;
+                }
+            }
+        } else {
+            panic("path > 256 for clist_dir");
+        }
+
+    closedir(dr);
+    if (sort) {
+        printf("%d\n", plst.nbr_rows);
+        ssort(plst.get, plst.nbr_rows, true);
+    }
+    return plst;
+}
 
 bool file_exists (char *filename) {
   struct stat   buffer;
@@ -569,9 +663,17 @@ int writefile(char *buffer, const char *filename, bool append) {
 
 
 char* chomp(char *line) {  // see also rtrim()
-    // Remove very last character of a string
-    line[strlen(line) - 1] = '\0';
-    return line;
+    // remove record separators
+    size_t len = strlen(line);
+    char *tmp = line;
+    for(int x=len; x >= 0; x--) {
+        if (strchr("\r\n", tmp[x]) == NULL ) {
+            break;
+        } else {
+            tmp[x] = '\0';
+        }
+    }
+    return tmp;
 }
 
 
@@ -599,14 +701,14 @@ char * deletechar(char *s, char *in, char targ, int number) {
 }
 
 
-char* today() {  // returns yyyy-mm-dd
+char* date(const char* format) {  // see man strftime
     time_t rawtime;
     struct tm *info;
     static char buffer[80];
 
     time( &rawtime );
     info = localtime( &rawtime );
-    strftime(buffer, 80, "%F", info);
+    strftime(buffer, 80, format, info);
     return buffer;
 }
 
@@ -617,7 +719,7 @@ char* today() {  // returns yyyy-mm-dd
 * after sec seconds. "sec" is passed along
 * to "f" the user handler function.
 ***/
-void timeout(int sec, void f(int)) {  // receive address of print
+void timeout(int sec, void f()) {
     signal(SIGALRM, f);
     alarm(sec);
 }
@@ -632,6 +734,15 @@ bool endswith (char* base, char* str) {
     int blen = strlen(base);
     int slen = strlen(str);
     return (blen >= slen) && (0 == strcmp(base + blen - slen, str));
+}
+
+
+bool contains(char *s, char *targ) {
+    if (strstr(s, targ)) {
+        return true;
+    } else {
+        return false;
+    }
 }
 
 
@@ -778,7 +889,7 @@ char* urlencode(char* originalText) {
 
 
 /***
-* EXTENDED STRING FUNCTIONS
+* LARGE-STRING FUNCTIONS
 * Each string is allocated and managed
 * within a struct of type cstr. Along with
 * its functions (below) this provides a safer

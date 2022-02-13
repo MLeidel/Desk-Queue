@@ -1,10 +1,11 @@
-/* descq.c
-       __
-  ____/ /__  ______________ _
- / __  / _ \/ ___/ ___/ __ `/
-/ /_/ /  __(__  ) /__/ /_/ /
-\__,_/\___/____/\___/\__, /
-                       /_/
+/* dsq.c  Desk-Queue
+           __
+      ____/ /________ _
+     / __  / ___/ __ `/
+    / /_/ (__  ) /_/ /
+    \__,_/____/\__, /
+                 /_/
+
 Michael Leidel (Feb 2021)
 OTHER FILES:
     descq.glade     programs GUI layout xml file
@@ -221,18 +222,18 @@ char g_last_entry[128] = {0};  // save user's last command only
 void write_history(char *text) {
     FILE *fh;
     char buf[80];
-    char rec[500][BUFFER2];
+    char rec[1000][BUFFER2];
     int count = 0;
     fh = open_for_read("data/hist.txt");
     while(1) {
         fgets(rec[count], BUFFER2, fh);
         if (feof(fh)) break;
         rtrim(rec[count++]);  // remove newline character
-        if (count > 900) return;  // too many hist recs !!
+        if (count > 990) panic("Too many history entries!");
     }
     fclose(fh);
     fh = open_for_write("data/hist.txt");
-    fprintf(fh, "%s -- %s\n", text, today(buf));
+    fprintf(fh, "%s -- %s\n", text, date(buf));
     for(int x=0; x < count; x++) {
        fprintf(fh, "%s\n", rec[x]);
     }
@@ -539,14 +540,14 @@ void displayListDlg(char * target) {
 
 void write_url(char *text) {  // Save url to urls.txt file and online file
     FILE *fh;
-    char rec[500][BUFFER2];
+    char rec[1000][BUFFER2];
     int count = 0;
     fh = open_for_read("data/urls.txt");
     while(1) {
         fgets(rec[count], BUFFER2, fh);
         if (feof(fh)) break;
         rtrim(rec[count++]);  // remove newline character
-        if (count > 498) return;  // too many urls !!
+        if (count > 990) panic("Too many URLs for urls.txt!");
     }
     fclose(fh);
     fh = open_for_write("data/urls.txt");
@@ -563,7 +564,7 @@ void save_clipboard_to_file() {
     FILE *fh;
     char *cliptxt;
 
-    cliptxt = (char *) malloc(2 * BUFFER3);  // 2MG
+    cliptxt = (char *) malloc(2 * BUFFER3);  // 1 MGB
 
     if (!gtk_clipboard_wait_is_text_available(g_clipboard)) {
         return;
