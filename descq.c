@@ -229,7 +229,8 @@ void write_history(char *text) {
         fgets(rec[count], BUFFER2, fh);
         if (feof(fh)) break;
         rtrim(rec[count++]);  // remove newline character
-        if (count > 990) panic("Too many history entries!");
+        if (count > 990)
+            ERRMSG(99, true, "Too many history entries!");
     }
     fclose(fh);
     fh = open_for_write("data/hist.txt");
@@ -317,7 +318,9 @@ void commands(char *out_str) {
                 clist_cleanup(vars);
                 // urlencode the search text
                 strcpy(action, out_str+2);
-                strcpy(action, urlencode(action));
+                char *linecoded = malloc(BUFFER2);
+                strcpy(action, urlencode(linecoded, action));
+                free(linecoded);
                 strcat(line, action);  // add search text to url query
                 //printf("%s\n", line);
                 system(line);
@@ -332,7 +335,9 @@ void commands(char *out_str) {
     } else {
         // It's an Internet Search using default browser
         write_history(out_str);
-        strcpy(out_str, urlencode(out_str));
+        char *linecoded = malloc(BUFFER2);
+        strcpy(out_str, urlencode(linecoded, out_str));
+        free(linecoded);
         strcpy(action, "xdg-open ");
         strcat(action, g_sea_engine);
         strcat(action, "\"");
@@ -547,7 +552,8 @@ void write_url(char *text) {  // Save url to urls.txt file and online file
         fgets(rec[count], BUFFER2, fh);
         if (feof(fh)) break;
         rtrim(rec[count++]);  // remove newline character
-        if (count > 990) panic("Too many URLs for urls.txt!");
+        if (count > 990)
+            ERRMSG(99, true, "Too many URLs for urls.txt!");
     }
     fclose(fh);
     fh = open_for_write("data/urls.txt");
@@ -771,7 +777,9 @@ void on_dlg_listbox_row_activated(GtkListBox *oList, GtkListBoxRow *oRow) {
                 gtk_entry_set_text(GTK_ENTRY(g_entry), listdata);
                 on_entry_activate(GTK_ENTRY(g_entry));
             } else {
-                strcpy(listdata, urlencode(listdata));
+                char *linecoded = malloc(BUFFER2);
+                strcpy(listdata, urlencode(linecoded, listdata));
+                free(linecoded);
                 strcpy(url, "xdg-open ");
                 strcat(url, g_sea_engine);
                 strcat(url, "\"");
