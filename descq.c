@@ -311,11 +311,11 @@ void commands(char *out_str) {
             if (startswith(line, action)) {
                 write_history(out_str);
                 chomp(line);  // remove newline
-                clist vars = clist_init(3, 1024);
-                clist_parse(vars, line, ",");
+                cary vars = cary_new(3, 1024);
+                cary_parse(vars, line, ",");
                 strcpy(line, "xdg-open ");     // build the command ...
                 strcat(line, vars.get[2]); // should return count = 3 (0,1,2)
-                clist_cleanup(vars);
+                cary_del(vars);
                 // urlencode the search text
                 strcpy(action, out_str+2);
                 char *linecoded = malloc(TWOKB);
@@ -450,14 +450,14 @@ int main(int argc, char *argv[])
     fgets(line, 64, fh);
     fclose(fh);
     chomp(line);  // remove new line character
-    clist vals = clist_init(5, 16);
-    clist_parse(vals, line, ",");
+    cary vals = cary_new(5, 16);
+    cary_parse(vals, line, ",");
     w_left      = atoi(vals.get[0]);
     w_top       = atoi(vals.get[1]);
     w_width     = atoi(vals.get[2]);
     w_height    = atoi(vals.get[3]);
     w_decor     = atoi(vals.get[4]);
-    clist_cleanup(vals);
+    cary_del(vals);
 
     gtk_widget_show(window);
     gtk_window_move(GTK_WINDOW(g_wnd), w_left, w_top);  // set metrics ...
@@ -741,12 +741,12 @@ void on_entry_activate(GtkEntry *entry) {
         return;
     }
     // User can enter multiple commands/searches delimited by "|"
-    clist coms = clist_init(20, 128);
-    cnt = clist_parse(coms, out_str, "|");
+    cary coms = cary_new(20, TWOKB);
+    cnt = cary_parse(coms, out_str, "|");
     for(inx = 0; inx < cnt; inx++) {
         process_entry(coms.get[inx]);
     }
-    clist_cleanup(coms);
+    cary_del(coms);
 }
 
 

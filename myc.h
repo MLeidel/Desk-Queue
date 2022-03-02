@@ -68,17 +68,17 @@ cstr cstr_new(size_t, char);
 
     // ARRSIZE(x) THIS IS A MACRO
 
-typedef struct clist {
+typedef struct cary {
     int nbr_rows;  // maximum records (columns, fields)
     int len_rows; // maximum length of one record (col, field)
     char** get;  // array of fields (char arrays or strings)
-} clist;
+} cary;
 
-clist clist_init(int, int);
-clist clist_dir(const char*, int, bool);
-int clist_parse(clist, char*, char*);
-void clist_display(clist);
-void clist_cleanup(clist);
+cary cary_new(int, int);
+cary cary_dir(const char*, int, bool);
+int cary_parse(cary, char*, char*);
+void cary_display(cary);
+void cary_del(cary);
 
 // FILE & PATH FUNCTIONS
 bool file_exists (char*);
@@ -340,7 +340,7 @@ int replacechar(char *a, char b, char c, int number) {
 }
 
 
-/*  clist: Parses out values from a csv string
+/*  cary: Parses out values from a csv string
     that may use double quotes for explicit text.
     Delimiters inside double quoted fields are
     ignored.
@@ -348,26 +348,26 @@ int replacechar(char *a, char b, char c, int number) {
 example:
 
 char * line; // some input csv string
-clist list = clist_init(5, 64);
-clist_parse(list, line, ",");  // returns nbr of cols found
+cary list = cary_new(5, 64);
+cary_parse(list, line, ",");  // returns nbr of cols found
     list.get[0] would be the first field
-clist_cleanup(list);  // free dynamic memory
+cary_del(list);  // free dynamic memory
 
 NOTE: the supplied input csv string is destroyed in the parsing
 NOTE: to get a single field from a csv string see the field function
 */
 
-// typedef struct clist {
+// typedef struct cary {
 //     int nbr_rows;  // maximum records (columns, fields)
 //     int len_rows; // maximum length of one record (col, field)
 //     char ** get; // array of fields (array of strings)
-// } clist;
+// } cary;
 
-clist clist_init(int col, int len) {
+cary cary_new(int col, int len) {
      /* Initialize variables and allocate memory
-        Return pointer to clist struct
+        Return pointer to cary struct
      */
-    clist csvf;
+    cary csvf;
     csvf.len_rows = len;
     csvf.nbr_rows = col;
     csvf.get = calloc(csvf.nbr_rows, sizeof(char*));  // pointers
@@ -409,7 +409,7 @@ char * qmark(char * str, char delim) {
 int qunmark(char **str, int sz, char delim) {
     /* Un-hides the delimiters found within dbl quotes
        of fields now residing in the fields array/list.
-       Called from clist.
+       Called from cary.
     */
     char **p = str;
     char *t;
@@ -428,14 +428,14 @@ int qunmark(char **str, int sz, char delim) {
     return count;
 }
 
-int clist_parse(clist csvf, char *str, char *delim) {
+int cary_parse(cary csvf, char *str, char *delim) {
     /*  parse the csv fields into the array elements
     */
     int finx = 0;
     char * found;
 
     if (strlen(delim) != 1) {
-        ERRMSG(99, true, "clist_parse delimiter must be length of 1");
+        ERRMSG(99, true, "cary_parse delimiter must be length of 1");
     }
 
     qmark(str, delim[0]);  // hide quoted delimiters
@@ -452,14 +452,14 @@ int clist_parse(clist csvf, char *str, char *delim) {
     return finx;
 }
 
-void clist_display(clist csvf) {
+void cary_display(cary csvf) {
     int x;
     for(x=0; x < csvf.nbr_rows; x++) {
         printf("%03d - [%s] \n", x, csvf.get[x]);
     }
 }
 
-void clist_cleanup(clist csvf) {
+void cary_del(cary csvf) {
     /* free each column's data then free the column pointer's
     */
     for(int col=0; col < csvf.nbr_rows; col++) {
@@ -469,7 +469,7 @@ void clist_cleanup(clist csvf) {
     free(csvf.get);
     csvf.get = NULL;
 }
-/*================= END clist .. etc. ====================*/
+/*================= END cary .. etc. ====================*/
 
 
 int qunmark1(char *str, char delim) {
@@ -599,7 +599,7 @@ int pathsize(const char *path, int dtype) {
     return count;
 }
 
-clist clist_dir(const char *path, int dtype, bool sort) {
+cary cary_dir(const char *path, int dtype, bool sort) {
     /*
      dir = 0 files and directories
      dir = 1 just files
@@ -608,12 +608,12 @@ clist clist_dir(const char *path, int dtype, bool sort) {
     struct dirent *de;
     int n = 0;
 
-    clist plst = clist_init(pathsize(path, dtype), 256);
+    cary plst = cary_new(pathsize(path, dtype), 256);
     DIR *dr = opendir(path);
     char fpath[256];
 
     if (dr == NULL)  {
-        ERRMSG(errno, true, "invalid path for clist_dir");
+        ERRMSG(errno, true, "invalid path for cary_dir");
     }
     while ((de = readdir(dr)) != NULL)
         if (strlen(de->d_name) < plst.len_rows) {
@@ -631,7 +631,7 @@ clist clist_dir(const char *path, int dtype, bool sort) {
                 }
             }
         } else {
-            ERRMSG(99, true, "path > 256 for clist_dir");
+            ERRMSG(99, true, "path > 256 for cary_dir");
         }
 
     closedir(dr);
