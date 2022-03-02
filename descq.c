@@ -13,15 +13,15 @@ OTHER FILES:
 This is free software; see the source for copying conditions.  There is NO
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE
 */
-#include "myc.h"
+#include <myc.h>
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
 #include <unistd.h>
 
 #define EDITOR g_editor
-#define BUFFER1 1024
-#define BUFFER2 2048
-#define BUFFER3 1048576
+#define ONEKB 1024
+#define TWOKB 2048
+#define ONEMB 1000000
 #define MAXURLS 200
 
 // glade xml file
@@ -222,13 +222,13 @@ char g_last_entry[128] = {0};  // save user's last command only
 void write_history(char *text) {
     FILE *fh;
     char buf[80];
-    char rec[1000][BUFFER2];
+    char rec[1000][TWOKB];
     int count = 0;
     fh = open_for_read("data/hist.txt");
     while(1) {
-        fgets(rec[count], BUFFER2, fh);
+        fgets(rec[count], TWOKB, fh);
         if (feof(fh)) break;
-        rtrim(rec[count++]);  // remove newline character
+        chomp(rec[count++]);  // remove newline character
         if (count > 990)
             ERRMSG(99, true, "Too many history entries!");
     }
@@ -258,8 +258,8 @@ void commands(char *out_str) {
         command or an internet search.
     */
     FILE *fh;
-    char action[BUFFER2] = {0};
-    char line[BUFFER2] = {0};
+    char action[TWOKB] = {0};
+    char line[TWOKB] = {0};
     char *ptr;
     int count = 0;
     int rsp = 0;
@@ -267,7 +267,7 @@ void commands(char *out_str) {
        if not found will continue on to eventually search */
     fh = open_for_read("data/serv.txt");
     while(1) {
-        fgets(line, BUFFER2, fh);
+        fgets(line, TWOKB, fh);
         if (feof(fh)) break;
         if (startswith(line, "#")) {
             continue;
@@ -306,11 +306,11 @@ void commands(char *out_str) {
         // Read the serv.txt file to find the correct line: letter:searchtext
         fh = open_for_read("data/serv.txt");
         while(1) {
-            fgets(line, BUFFER2, fh);
+            fgets(line, TWOKB, fh);
             if (feof(fh)) break;
             if (startswith(line, action)) {
                 write_history(out_str);
-                rtrim(line);  // remove newline
+                chomp(line);  // remove newline
                 clist vars = clist_init(3, 1024);
                 clist_parse(vars, line, ",");
                 strcpy(line, "xdg-open ");     // build the command ...
@@ -318,7 +318,7 @@ void commands(char *out_str) {
                 clist_cleanup(vars);
                 // urlencode the search text
                 strcpy(action, out_str+2);
-                char *linecoded = malloc(BUFFER2);
+                char *linecoded = malloc(TWOKB);
                 strcpy(action, urlencode(linecoded, action));
                 free(linecoded);
                 strcat(line, action);  // add search text to url query
@@ -335,7 +335,7 @@ void commands(char *out_str) {
     } else {
         // It's an Internet Search using default browser
         write_history(out_str);
-        char *linecoded = malloc(BUFFER2);
+        char *linecoded = malloc(TWOKB);
         strcpy(out_str, urlencode(linecoded, out_str));
         free(linecoded);
         strcpy(action, "xdg-open ");
@@ -363,7 +363,7 @@ void change_editor() {
     FILE *fh;
     fh = open_for_read("data/editor.txt");
     fgets(g_editor, 127, fh);
-    rtrim(g_editor);
+    chomp(g_editor);
     fclose(fh);
 }
 
@@ -371,7 +371,7 @@ void change_query_engine() {
     FILE *fh;
     fh = open_for_read("data/search.txt");
     fgets(g_sea_engine, 127, fh);
-    rtrim(g_sea_engine);
+    chomp(g_sea_engine);
     fclose(fh);
 }
 
@@ -396,7 +396,7 @@ int main(int argc, char *argv[])
     int             w_height;
     int             w_decor;
     int             count = 0;
-    char            line[BUFFER2];
+    char            line[TWOKB];
 
     gtk_init(&argc, &argv);
 
@@ -449,7 +449,7 @@ int main(int argc, char *argv[])
     fh = open_for_read("data/winmet.txt");
     fgets(line, 64, fh);
     fclose(fh);
-    rtrim(line);  // remove new line character
+    chomp(line);  // remove new line character
     clist vals = clist_init(5, 16);
     clist_parse(vals, line, ",");
     w_left      = atoi(vals.get[0]);
@@ -468,7 +468,7 @@ int main(int argc, char *argv[])
     // count lines in urls.txt
     fh = open_for_read("data/urls.txt");
     while(1) {
-        fgets(line, BUFFER2, fh);
+        fgets(line, TWOKB, fh);
         if (feof(fh)) break;
         count++;  // counting URLS in file
     }
@@ -493,8 +493,7 @@ int main(int argc, char *argv[])
 
 
 // called when window is closed
-void on_window1_destroy()
-{
+void on_window1_destroy() {
     gtk_main_quit();
 }
 
@@ -502,7 +501,7 @@ void on_window1_destroy()
 void displayListDlg(char * target) {
     GtkListBoxRow *g_row;
     FILE *fh;
-    char line[BUFFER2];
+    char line[TWOKB];
     char filename[25];
 
     // remove any existing rows
@@ -527,10 +526,10 @@ void displayListDlg(char * target) {
 
     fh = open_for_read(filename);
     while(1) {
-        fgets(line, BUFFER2, fh);
+        fgets(line, TWOKB, fh);
         if (feof(fh)) break;
         if (strstr(line, "-- SERVICES --")) break;  // only in serv.txt (hopefully!)
-        rtrim(line);  // remove newline character
+        chomp(line);  // removes newline character
         g_label = gtk_label_new (line);
         gtk_label_set_xalign (GTK_LABEL(g_label), 0.0);
         gtk_list_box_insert(GTK_LIST_BOX(g_dlg_listbox), g_label, -1);
@@ -545,13 +544,13 @@ void displayListDlg(char * target) {
 
 void write_url(char *text) {  // Save url to urls.txt file and online file
     FILE *fh;
-    char rec[1000][BUFFER2];
+    char rec[1000][TWOKB];
     int count = 0;
     fh = open_for_read("data/urls.txt");
     while(1) {
-        fgets(rec[count], BUFFER2, fh);
+        fgets(rec[count], TWOKB, fh);
         if (feof(fh)) break;
-        rtrim(rec[count++]);  // remove newline character
+        chomp(rec[count++]);  // remove newline character
         if (count > 990)
             ERRMSG(99, true, "Too many URLs for urls.txt!");
     }
@@ -570,7 +569,7 @@ void save_clipboard_to_file() {
     FILE *fh;
     char *cliptxt;
 
-    cliptxt = (char *) malloc(2 * BUFFER3);  // 1 MGB
+    cliptxt = (char *) malloc(2 * ONEMB);  // 1 MGB
 
     if (!gtk_clipboard_wait_is_text_available(g_clipboard)) {
         return;
@@ -610,14 +609,14 @@ const char * get_bc_result(const char * expr) {
 
     /* close */
     pclose(fp);
-    return rtrim(path);
+    return chomp(path);
 }
 
 
 void process_entry(char *out_str) {
     FILE *fh;
-    char action[BUFFER2] = {0};
-    //gchar out_str[BUFFER2] = {0};
+    char action[TWOKB] = {0};
+    //gchar out_str[TWOKB] = {0};
     int w_top;
     int w_left;
     int w_width;
@@ -731,7 +730,7 @@ void on_entry_activate(GtkEntry *entry) {
     2. alias from the serv.txt file
     3. Internet search text
     */
-    gchar out_str[BUFFER2] = {0};
+    gchar out_str[TWOKB] = {0};
     int cnt = 0;
     int inx = 0;
 
@@ -753,9 +752,9 @@ void on_entry_activate(GtkEntry *entry) {
 
 void on_dlg_listbox_row_activated(GtkListBox *oList, GtkListBoxRow *oRow) {
     GtkWidget *bin;
-    char listdata[BUFFER2];
+    char listdata[TWOKB];
     char *ptr;  // pointer used with listdata
-    char url[BUFFER2];
+    char url[TWOKB];
 
     bin = gtk_bin_get_child(GTK_BIN(oRow));
     strcpy(listdata, gtk_label_get_text(GTK_LABEL(bin)));
@@ -777,7 +776,7 @@ void on_dlg_listbox_row_activated(GtkListBox *oList, GtkListBoxRow *oRow) {
                 gtk_entry_set_text(GTK_ENTRY(g_entry), listdata);
                 on_entry_activate(GTK_ENTRY(g_entry));
             } else {
-                char *linecoded = malloc(BUFFER2);
+                char *linecoded = malloc(TWOKB);
                 strcpy(listdata, urlencode(linecoded, listdata));
                 free(linecoded);
                 strcpy(url, "xdg-open ");
@@ -794,7 +793,7 @@ void on_dlg_listbox_row_activated(GtkListBox *oList, GtkListBoxRow *oRow) {
  // Execute the entry text,
 // or if entry is empty save to clipboard.
 void on_btn_entry_clicked() {
-    gchar out_str[BUFFER2] = {0};
+    gchar out_str[TWOKB] = {0};
     sprintf(out_str, "%s", gtk_entry_get_text(GTK_ENTRY(g_entry)));
     trim(out_str);  // stringalt.h
     if (equals(out_str, "")) {  // Try to save clipboard contents to clip.txt

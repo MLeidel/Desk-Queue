@@ -53,6 +53,17 @@ int replacechar(char*, char, char, int);
 int replacesz(char *, char *, char *, int);
 int strtype(char*, int);
 
+
+// STRING ALLOCATION
+typedef struct {
+    size_t length;  // allocated length
+    char *str;
+} cstr;
+
+bool cstr_cpy(cstr, char*);
+void cstr_del(cstr);
+cstr cstr_new(size_t, char);
+
 // ARRAY FUNCTIONS
 
     // ARRSIZE(x) THIS IS A MACRO
@@ -78,6 +89,7 @@ int isfile(const char*);
 int pathsize(const char*, int);
 int readfile(char*, const char*);
 int writefile(char*, const char*, bool append);
+long filesize(const char*);
 
 // DATE/TIME & OTHER FUNCTIONS
 char* date(const char*);
@@ -98,7 +110,8 @@ char *realpath(const char *restrict path, char *restrict resolved_path);
         // realpath(filename, buff) // returns NULL on error
 char *getenv(const char *name)
         // sprintf(descq_path, "%s/.config/descq", getenv("HOME"));
-/*\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/*/
+---------------------------------------------------------------------------
+*/
 
 /*
             MACROS, DEFINES, AND UTILITIES
@@ -155,6 +168,33 @@ void ssort(char* arr[], int n, bool ignorecase) {
         STRINGS
 */
 
+
+cstr cstr_new(size_t length, char fill) {
+    cstr s;
+    s.str = malloc(length * sizeof(char));
+    s.length = length;
+    memset(s.str, fill, s.length);
+    return s;
+}
+
+bool cstr_cpy(cstr s, char *data) {
+    size_t len;
+    len = strlen(data);
+    if (len > s.length - 1) {
+        fprintf(stderr,"\ncstr_cpy boundary error\n");
+        return false;
+    }
+    strcpy(s.str, data);
+    return true;
+}
+
+void cstr_del(cstr s) {
+    free(s.str);
+    s.str = NULL;
+    s.length = 0;
+}
+
+
 char *strrev(char *str) {
     int i=0, j=0;
     char temp;
@@ -177,6 +217,7 @@ char *ltrim(char *s) {
     return forward-1;
 }
 
+
 char *rtrim(char *s) {
     char* back = s + strlen(s);
     while(isspace(*--back));
@@ -184,9 +225,11 @@ char *rtrim(char *s) {
     return s;
 }
 
+
 char *trim(char *s) {
     return rtrim(ltrim(s));
 }
+
 
 char *rightof(char *out, char *in, char *targ, int start) {
     char *p;
@@ -200,6 +243,7 @@ char *rightof(char *out, char *in, char *targ, int start) {
     strcpy(out, p);
     return p;  // *in remains unchanged
 }
+
 
 char *leftof(char *out, char *in, char *targ, int start) {
     char *p;
@@ -279,7 +323,6 @@ char * replace (char *buf, char *a, char *b, char *c, int number) {
 
 
 int replacechar(char *a, char b, char c, int number) {
-    int len = strlen(a);
     char *p;
     int count = 0;
 
@@ -667,6 +710,19 @@ int writefile(char *buffer, const char *filename, bool append) {
     return 0;
 }
 
+long filesize(const char *filename) {
+    FILE *f;
+    if ((f = fopen(filename,"rb")) == NULL) {
+        ERRMSG(errno, false, "fopen: error on filesize function");
+        return -1;
+    }
+    fseek(f, 0, SEEK_END);
+    long fsize = ftell(f);
+    fclose(f);
+    return fsize;
+}
+
+
 
 char* chomp(char *line) {  // see also rtrim()
     // remove record separators
@@ -689,7 +745,7 @@ char *concat(char *dest, int num, ...) {
 
     va_start(ap, num);
 
-    strcpy(p, va_arg(ap, char*));  // first one
+    strcat(p, va_arg(ap, char*));  // first one
 
     for(int x=0; x < num-1; x++) {
         strcat(p, va_arg(ap, char*));
@@ -780,6 +836,9 @@ int contains(char *s, char *targ) {
     int count = 0;
     char *p = s;
 
+    if (tlen < 1)
+        return 0;
+
     while(true) {
         p = strstr(p, targ);
         if (p == NULL)
@@ -792,9 +851,9 @@ int contains(char *s, char *targ) {
 
 char * strrstr(char *s, char *t) {
     // does not come with gcc as far as I know
-    char *p, *r;
+    char *r;
     char *i = NULL;
-    p = s;
+
     while (1) {
         r = strstr(s, t);
         if (r == NULL) {
