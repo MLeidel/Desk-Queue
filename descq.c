@@ -311,11 +311,11 @@ void commands(char *out_str) {
             if (startswith(line, action)) {
                 write_history(out_str);
                 chomp(line);  // remove newline
-                cary vars = cary_new(3, 1024);
-                cary_parse(vars, line, ",");
+                aros vars = aros_new(3, 1024);
+                aros_parse(vars, line, ",");
                 strcpy(line, "xdg-open ");     // build the command ...
-                strcat(line, vars.get[2]); // should return count = 3 (0,1,2)
-                cary_del(vars);
+                strcat(line, vars.item[2]); // should return count = 3 (0,1,2)
+                aros_del(vars);
                 // urlencode the search text
                 strcpy(action, out_str+2);
                 char *linecoded = malloc(TWOKB);
@@ -450,14 +450,14 @@ int main(int argc, char *argv[])
     fgets(line, 64, fh);
     fclose(fh);
     chomp(line);  // remove new line character
-    cary vals = cary_new(5, 16);
-    cary_parse(vals, line, ",");
-    w_left      = atoi(vals.get[0]);
-    w_top       = atoi(vals.get[1]);
-    w_width     = atoi(vals.get[2]);
-    w_height    = atoi(vals.get[3]);
-    w_decor     = atoi(vals.get[4]);
-    cary_del(vals);
+    aros vals = aros_new(5, 16);
+    aros_parse(vals, line, ",");
+    w_left      = atoi(vals.item[0]);
+    w_top       = atoi(vals.item[1]);
+    w_width     = atoi(vals.item[2]);
+    w_height    = atoi(vals.item[3]);
+    w_decor     = atoi(vals.item[4]);
+    aros_del(vals);
 
     gtk_widget_show(window);
     gtk_window_move(GTK_WINDOW(g_wnd), w_left, w_top);  // set metrics ...
@@ -625,13 +625,13 @@ void process_entry(char *out_str) {
 
     strcpy(g_last_entry, out_str);  // copy command into g_last_entry
 
-    if (equalsignorecase(out_str, "list")) {        // list urls
+    if (equalsignore(out_str, "list")) {        // list urls
         displayListDlg("urls");
 
-    } else if (equalsignorecase(out_str, "hist")) { // list history
+    } else if (equalsignore(out_str, "hist")) { // list history
         displayListDlg("hist");
 
-    } else if (equalsignorecase(out_str, "serv") || (equals(out_str, "?"))) { // list commands from serv.txt
+    } else if (equalsignore(out_str, "serv") || (equals(out_str, "?"))) { // list commands from serv.txt
         displayListDlg("serv");
 
     } else if (startswith(out_str, "http")) {       // saves URL to urls.txt
@@ -660,7 +660,7 @@ void process_entry(char *out_str) {
         strcat(action, " data/urls.txt &");
         system(action);
 
-    } else if (equalsignorecase(out_str, "help") || (equalsignorecase(out_str, "about"))) {  // edit help.txt
+    } else if (equalsignore(out_str, "help") || (equalsignore(out_str, "about"))) {  // edit help.txt
         strcpy(action, EDITOR);
         strcat(action, " data/help.txt &");
         int rsp = system(action);
@@ -693,7 +693,7 @@ void process_entry(char *out_str) {
             gtk_window_set_decorated (GTK_WINDOW(g_wnd), 1);
         }
 
-    } else if (equalsignorecase(out_str, "winset")) {        // save window position
+    } else if (equalsignore(out_str, "winset")) {        // save window position
         gtk_window_get_position (GTK_WINDOW(g_wnd), &w_left, &w_top);
         gtk_window_get_size (GTK_WINDOW(g_wnd), &w_width, &w_height);
         fh = open_for_write("data/winmet.txt");
@@ -741,12 +741,12 @@ void on_entry_activate(GtkEntry *entry) {
         return;
     }
     // User can enter multiple commands/searches delimited by "|"
-    cary coms = cary_new(20, TWOKB);
-    cnt = cary_parse(coms, out_str, "|");
+    aros coms = aros_new(20, TWOKB);
+    cnt = aros_parse(coms, out_str, "|");
     for(inx = 0; inx < cnt; inx++) {
-        process_entry(coms.get[inx]);
+        process_entry(coms.item[inx]);
     }
-    cary_del(coms);
+    aros_del(coms);
 }
 
 
