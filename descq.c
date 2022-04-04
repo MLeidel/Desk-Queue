@@ -1,10 +1,10 @@
-/* dsq.c  Desk-Queue
-           __
-      ____/ /________ _
-     / __  / ___/ __ `/
-    / /_/ (__  ) /_/ /
-    \__,_/____/\__, /
-                 /_/
+/* descq.c  Desk-Queue
+       __
+  ____/ /__  ______________ _
+ / __  / _ \/ ___/ ___/ __ `/
+/ /_/ /  __(__  ) /__/ /_/ /
+\__,_/\___/____/\___/\__, /
+                       /_/
 
 Michael Leidel (Feb 2021)
 OTHER FILES:
@@ -16,7 +16,6 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE
 #include <myc.h>
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
-#include <unistd.h>
 
 #define EDITOR g_editor
 #define ONEKB 1024
@@ -311,11 +310,11 @@ void commands(char *out_str) {
             if (startswith(line, action)) {
                 write_history(out_str);
                 chomp(line);  // remove newline
-                aros vars = aros_new(3, 1024);
-                aros_parse(vars, line, ",");
+                list vars = list_def(3, 1024);
+                list_split(vars, line, ",");
                 strcpy(line, "xdg-open ");     // build the command ...
                 strcat(line, vars.item[2]); // should return count = 3 (0,1,2)
-                aros_del(vars);
+                list_del(vars);
                 // urlencode the search text
                 strcpy(action, out_str+2);
                 char *linecoded = malloc(TWOKB);
@@ -450,14 +449,14 @@ int main(int argc, char *argv[])
     fgets(line, 64, fh);
     fclose(fh);
     chomp(line);  // remove new line character
-    aros vals = aros_new(5, 16);
-    aros_parse(vals, line, ",");
+    list vals = list_def(5, 16);
+    list_split(vals, line, ",");
     w_left      = atoi(vals.item[0]);
     w_top       = atoi(vals.item[1]);
     w_width     = atoi(vals.item[2]);
     w_height    = atoi(vals.item[3]);
     w_decor     = atoi(vals.item[4]);
-    aros_del(vals);
+    list_del(vals);
 
     gtk_widget_show(window);
     gtk_window_move(GTK_WINDOW(g_wnd), w_left, w_top);  // set metrics ...
@@ -741,12 +740,12 @@ void on_entry_activate(GtkEntry *entry) {
         return;
     }
     // User can enter multiple commands/searches delimited by "|"
-    aros coms = aros_new(20, TWOKB);
-    cnt = aros_parse(coms, out_str, "|");
+    list coms = list_def(20, TWOKB);
+    cnt = list_split(coms, out_str, "|");
     for(inx = 0; inx < cnt; inx++) {
         process_entry(coms.item[inx]);
     }
-    aros_del(coms);
+    list_del(coms);
 }
 
 
