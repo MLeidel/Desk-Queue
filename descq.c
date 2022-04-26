@@ -750,17 +750,18 @@ void on_entry_activate(GtkEntry *entry) {
 
 void on_dlg_listbox_row_activated(GtkListBox *oList, GtkListBoxRow *oRow) {
     GtkWidget *bin;
-    char listdata[TWOKB];
+    char listdata[TWOKB] = {'\0'};
     char *ptr;  // pointer used with listdata
-    char url[TWOKB];
+    char url[TWOKB] = {'\0'};
 
     bin = gtk_bin_get_child(GTK_BIN(oRow));
     strcpy(listdata, gtk_label_get_text(GTK_LABEL(bin)));
     gtk_clipboard_set_text(g_clipboard, listdata, -1);
     if (startswith(listdata, "http")) {  // LIST item
-        strcpy(url, "xdg-open ");
-        strcat(url, listdata);
-        strcat(url, " &");  // do not wait for system to finish
+        // strcpy(url, "xdg-open ");
+        // strcat(url, listdata);
+        // strcat(url, " &");  // do not wait for system to finish
+        concat(url, "xdg-open ", listdata, " &", END);
         system(url);
     } else {  // SERV item
         if (ptr = strchr(listdata, ',')) {
@@ -775,11 +776,7 @@ void on_dlg_listbox_row_activated(GtkListBox *oList, GtkListBoxRow *oRow) {
                 char *linecoded = malloc(TWOKB);
                 strcpy(listdata, urlencode(linecoded, listdata));
                 free(linecoded);
-                strcpy(url, "xdg-open ");
-                strcat(url, g_sea_engine);
-                strcat(url, "\"");
-                strcat(url, listdata);  // quotes necessary incase of embeded quote
-                strcat(url, "\"");
+                concat(url, "xdg-open ", g_sea_engine, "\"", listdata, "\"", END);
                 system(url);
             }
         }
