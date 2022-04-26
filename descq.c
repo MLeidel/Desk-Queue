@@ -220,7 +220,6 @@ char g_last_entry[128] = {0};  // save user's last command only
 // Add a seach text to hist.txt file
 void write_history(char *text) {
     FILE *fh;
-    char buf[80];
     char rec[1000][TWOKB];
     int count = 0;
     fh = open_for_read("data/hist.txt");
@@ -233,7 +232,7 @@ void write_history(char *text) {
     }
     fclose(fh);
     fh = open_for_write("data/hist.txt");
-    fprintf(fh, "%s -- %s\n", text, date(buf));
+    fprintf(fh, "%s -- %s\n", text, date("%F"));
     for(int x=0; x < count; x++) {
        fprintf(fh, "%s\n", rec[x]);
     }
@@ -763,14 +762,12 @@ void on_dlg_listbox_row_activated(GtkListBox *oList, GtkListBoxRow *oRow) {
         strcat(url, listdata);
         strcat(url, " &");  // do not wait for system to finish
         system(url);
-        gtk_widget_hide (g_dialog_box);
     } else {  // SERV item
         if (ptr = strchr(listdata, ',')) {
             *ptr = '\0';  // replace ',' with end of string \0 for line
             commands(listdata);
         } else {  // HIST item
             listdata[strlen(listdata) - 14] = '\0';  // cut off the date
-            //printf("%s\n", listdata);
             if (listdata[1] == ':') {
                 gtk_entry_set_text(GTK_ENTRY(g_entry), listdata);
                 on_entry_activate(GTK_ENTRY(g_entry));
@@ -787,6 +784,7 @@ void on_dlg_listbox_row_activated(GtkListBox *oList, GtkListBoxRow *oRow) {
             }
         }
     }
+    gtk_widget_hide (g_dialog_box);
 }
 
  // Execute the entry text,

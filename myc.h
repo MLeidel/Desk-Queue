@@ -27,7 +27,7 @@
 #include <locale.h>
 
 
-  // DECLARATIONS
+// DECLARATIONS
 
 char myc_quote_chars = '\"';    // if needed reset this variable
 
@@ -36,28 +36,32 @@ bool compare(char*, const char*, char*);
 bool endswith(char*, char*);
 bool equals(char*, char*);
 bool equalsignore(char*, char*);
+bool isnum_us(char*);
 bool startswith(char*, char*);
+
 char* chomp(char*);
-char* concat(char*, int, ...);
+char* concat(char*, ...);
 char* deletechar(char*, char*, char*, size_t, size_t);
 char* field(char*, char*, char, int, bool);
 char* insert(char*, char*, char*, size_t);
 char* insert_new(char*, char*, size_t);
 char* lastsub(char*, char*);
 char* lowercase(char*);
-char* leftof(char*, char*, char*, int);
+char* lof(char*, char*, char*, int);
 char* ltrim(char*);
 char* replace(char*, char*, char*, char*, size_t, size_t);
 char* replace_new (char*, char*, char*, size_t, size_t);
-char* rightof(char*, char*, char*, int);
+char* rof(char*, char*, char*, int);
 char* rtrim(char*);
 char* strrev(char*);
 char* substr(char*, char*, int, int);
 char* trim(char*);
 char* uppercase(char*);
 char* urlencode(char*, char*);
+int between(char*, char*, char*, char*, int);
 int charat(char*, char);
 int contains(char*, char*);
+int contvars(char*, char*);
 int indexof(char*, char*);
 int lastcharat(char*, char);
 int lastindexof(char*, char*);
@@ -95,16 +99,23 @@ typedef struct list {
     char** item;  // array of fields (char arrays or strings)
 } list;
 
+char* list_string(list, char*, char*);
 list list_def(int, int);
 list list_dir(const char*, int, bool);
 list list_read(char*, bool);
+list list_redef(list, int, int);
+int list_find(list, char*);
 int list_split(list, char*, char*);
-void list_copy(list, size_t, char*);
+void list_update(list, char*, int);
 void list_display(list);
 void list_del(list);
 void list_init(list, ...);
+void list_inject(list, char*, int);
+void list_remove(list, int);
+void list_io(list, char*, char);
 
 // FILE & PATH FUNCTIONS
+
 bool file_exists (char*);
 FILE * open_for_append(char*);
 FILE * open_for_read(char*);
@@ -117,6 +128,9 @@ int isfile(const char*);
 int pathsize(const char*, int);
 int readfile(char*, const char*);
 int writefile(char*, const char*, bool append);
+void filecopy(char*, char*);
+void filedelete(char*);
+void filemove(char*, char*);
 
 // DATE/TIME & OTHER FUNCTIONS
 char* date(const char*);
@@ -129,23 +143,26 @@ void isort(int[], int);
 void ssort(char*[], int, bool);
 void dsort(double[], int);
 
-/* END DECLARATIONS
+// ZEN DIALOGS
+int zenmsg(char*, char*, char*);
+void runproc(char*, char*);
+void zen(char*, char*);
+void zenfile(char*, char*, bool, bool);
+void zenform(char*, char*);
+void zenlist(char*, char*);
+void zenotify(char*, bool);
+void zentext(char* , char*, char*, bool);
 
------------------------------------------
---------- Helpfull gcc functions --------
------------------------------------------
-char *realpath(const char *restrict path, char *restrict resolved_path);
-        // realpath(filename, buff) // returns NULL on error
-char *getenv(const char *name)
-        // sprintf(descq_path, "%s/.config/descq", getenv("HOME"));
----------------------------------------------------------------------------
-*/
+// END DECLARATIONS
+
 
 /*
             MACROS, DEFINES, AND UTILITIES
 */
 #define ARRSIZE(x)  (sizeof(x) / sizeof((x)[0]))
 #define ERRMSG(a, b, c) (errmsg(a, b, c, __LINE__, __FILE__))
+#define ZENMSG_YES 0
+#define END "end"
 
 // compare
 #define GT ">"
@@ -161,22 +178,25 @@ char *getenv(const char *name)
 #define NEQ "!="
 #define NotEqual "!="
 
+//strtype
+enum styp {ALPHA, ALNUM, DIGIT, PRINT, SPACE, UPPER, LOWER, PUNCT};
+
 
 void errmsg(int rc, bool quit, char *msg, int line, char *filename) {
     char em[64];
-    if( rc == -1 ) {
+    if ( rc == -1 ) {
         strcpy(em, "application defined");
     } else {
         strcpy(em, strerror(rc));
     }
     fprintf(stderr,
-        "ERRMSG  %s near line: %d, errno: %d %s\n%s\n",
-        filename,
-        line,
-        rc,
-        em,
-        msg
-        );
+            "ERRMSG  %s near line: %d, errno: %d %s\n%s\n",
+            filename,
+            line,
+            rc,
+            em,
+            msg
+           );
     if (quit) {  // print additional line and terminate program
         fprintf(stderr, "Program Exited\n");
         exit(EXIT_FAILURE);
@@ -184,7 +204,7 @@ void errmsg(int rc, bool quit, char *msg, int line, char *filename) {
 }
 
 static int myisortcmp (const void * a, const void * b) {
-   return ( *(int*)a - *(int*)b );
+    return ( *(int*)a - * (int*)b );
 }
 // sort an array of integers
 void isort(int values[], int n) {
@@ -192,7 +212,7 @@ void isort(int values[], int n) {
 }
 
 static int mydsortcmp (const void * a, const void * b) {
-   return ( *(double*)a - *(double*)b );
+    return ( *(double*)a - * (double*)b );
 }
 // sort an array of doubles
 void dsort(double values[], int n) {
@@ -200,10 +220,10 @@ void dsort(double values[], int n) {
 }
 
 static int myssortcmp(const void* a, const void* b) {
-      return strcmp(*(const char**)a, *(const char**)b);
+    return strcmp(*(const char**)a, *(const char**)b);
 }
 static int myssortcasecmp(const void* a, const void* b) {
-      return strcasecmp(*(const char**)a, *(const char**)b);
+    return strcasecmp(*(const char**)a, *(const char**)b);
 }
 // sort an array of strings
 void ssort(char* arr[], int n, bool ignorecase) {
@@ -265,7 +285,7 @@ bool string_cpy(string s, char *data) {
     size_t len;
     len = strlen(data);
     if (len > s.length - 1) {
-        fprintf(stderr,"\nstring_cpy boundary error\n");
+        fprintf(stderr, "\nstring_cpy boundary error\n");
         return false;
     }
     strcpy(s.value, data);
@@ -287,10 +307,10 @@ string string_wrp(char *in, size_t length, char sep) {
 
     replacechar(in, sep, ' ', 0); // remove existing newlines
 
-    while( in[pos] != '\0') {
+    while ( in[pos] != '\0') {
 
-        if(++linx > length) {
-            while( in[pos] != ' ') { pos--; cinx--; }
+        if (++linx > length) {
+            while ( in[pos] != ' ') { pos--; cinx--; }
             linx = 0;
             cout.value[cinx++] = sep;
             pos++;
@@ -303,14 +323,14 @@ string string_wrp(char *in, size_t length, char sep) {
 
 
 char *strrev(char *str) {
-    int i=0, j=0;
+    int i = 0, j = 0;
     char temp;
 
-    j=strlen(str)-1;
-    while(i<j) {
-        temp=str[j];
-        str[j]=str[i];
-        str[i]=temp;
+    j = strlen(str) - 1;
+    while (i < j) {
+        temp = str[j];
+        str[j] = str[i];
+        str[i] = temp;
         i++;
         j--;
     }
@@ -320,15 +340,15 @@ char *strrev(char *str) {
 
 char *ltrim(char *s) {
     char *forward = s;
-    while(isspace(*forward++));
-    return forward-1;
+    while (isspace(*forward++));
+    return forward - 1;
 }
 
 
 char *rtrim(char *s) {
     char* back = s + strlen(s);
-    while(isspace(*--back));
-    *(back+1) = '\0';
+    while (isspace(*--back));
+    *(back + 1) = '\0';
     return s;
 }
 
@@ -338,32 +358,15 @@ char *trim(char *s) {
 }
 
 
-char *rightof(char *out, char *in, char *targ, int start) {
-    char *p;
-    char *s;
-
-    s = in + start;
-    p = strstr(s, targ);
-    if (p == NULL)
-        return NULL;
-    p += strlen(targ);
-    strcpy(out, p);
-    return p;  // *in remains unchanged
+char *lof(char *buf, char *input, char *delim, int start) {
+    int inx = indexof(input+start, delim);
+    return substr(buf, input+start, 0, inx);
 }
 
 
-char *leftof(char *out, char *in, char *targ, int start) {
-    char *p;
-    int len = 0;
-
-    in += start;
-    p = strstr(in, targ);
-    if (p == NULL)
-        return NULL;
-    len = p - in;
-    strncpy(out, in, len);
-    out[len] = '\0';
-    return out;  // *in remains unchanged
+char *rof(char *buf, char *input, char *delim, int start) {
+    int inx = indexof(input+start, delim) + strlen(delim);
+    substr(buf, input+start, inx, 0);
 }
 
 
@@ -399,7 +402,7 @@ char * replace (char *buf, char *a, char *b, char *c, size_t start, size_t numbe
     char *s = 0;
     char *ap;
     char *p;
-    char *bfa = calloc(strlen(a)+1, 1);
+    char *bfa = calloc(strlen(a) + 1, 1);
     // or char *bfa = strdup(a);
 
     strcpy(bfa, a);
@@ -408,7 +411,7 @@ char * replace (char *buf, char *a, char *b, char *c, size_t start, size_t numbe
     s = ap = bfa;
     s += start;
 
-    while(1) {
+    while (1) {
         p = strstr(s, b);
         if (p == NULL) {
             break;
@@ -436,7 +439,7 @@ char * replace_new (char *a, char *b, char *c, size_t start, size_t number) {
     char *s = 0;
     char *ap;
     char *p;
-    char *bfa = calloc(strlen(a)+1, 1);
+    char *bfa = calloc(strlen(a) + 1, 1);
     // or char *bfa = strdup(a);
 
     int newlen = replacesz(a, b, c, number);
@@ -448,7 +451,7 @@ char * replace_new (char *a, char *b, char *c, size_t start, size_t number) {
     s = ap = bfa;
     s += start;
 
-    while(1) {
+    while (1) {
         p = strstr(s, b);
         if (p == NULL) {
             break;
@@ -498,17 +501,31 @@ int replacechar(char *a, char b, char c, size_t number) {
 */
 
 list list_def(int col, int len) {
-     /* Initialize variables and allocate memory
-        Return pointer to list struct
-     */
+    /* Initialize variables and allocate memory
+       Return pointer to list struct
+    */
     list csvf;
     csvf.len_rows = len;
     csvf.nbr_rows = col;
     csvf.item = calloc(csvf.nbr_rows, sizeof(char*));  // pointers
-    for(int x=0; x < csvf.nbr_rows; x++) {
+    for (int x = 0; x < csvf.nbr_rows; x++) {
         csvf.item[x] = calloc(csvf.len_rows, sizeof(char));
     }
     return csvf;
+}
+
+/*
+    Returns a Re-DEFined list with new dimensions.
+    Retains items from first list and removes it.
+*/
+list list_redef(list l1, int new_rows, int new_len) {
+    int x = 0;
+    list lnew = list_def(new_rows, new_len);
+    for(x=0; x < l1.nbr_rows; x++) {
+        list_update(lnew, l1.item[x], x);
+    }
+    list_del(l1);
+    return lnew;
 }
 
 char * qmark(char * str, char delim) {
@@ -518,7 +535,7 @@ char * qmark(char * str, char delim) {
     char *p = str;
     bool marking = false;
 
-    while(*p != '\0') {
+    while (*p != '\0') {
 
         if (*p == myc_quote_chars) { // quotes found
             if (marking) {
@@ -549,9 +566,9 @@ int qunmark(char **str, int sz, char delim) {
     char *t;
     int count = 0;
 
-    for (int x=0; x < sz; x++) {
+    for (int x = 0; x < sz; x++) {
         t = p[x];
-        while(*t != '\0') {
+        while (*t != '\0') {
             if (*t == 31) {
                 *t = delim;
                 count++;
@@ -574,8 +591,8 @@ int list_split(list csvf, char *str, char *delim) {
 
     qmark(str, delim[0]);  // hide quoted delimiters
 
-    while( (found = strsep(&str, delim)) != NULL ) {
-        if( delim[0] == ' ' && *found == '\0' ) {  // handle ' ' delimiter
+    while ( (found = strsep(&str, delim)) != NULL ) {
+        if ( delim[0] == ' ' && *found == '\0' ) { // handle ' ' delimiter
             continue;  // handle consecutive space as one delimiter
         }
         strcpy(csvf.item[finx++], trim(found));
@@ -588,7 +605,7 @@ int list_split(list csvf, char *str, char *delim) {
 
 void list_display(list csvf) {
     int x;
-    for(x=0; x < csvf.nbr_rows; x++) {
+    for (x = 0; x < csvf.nbr_rows; x++) {
         printf("%03d - [%s] \n", x, csvf.item[x]);
     }
 }
@@ -596,7 +613,7 @@ void list_display(list csvf) {
 void list_del(list csvf) {
     /* free each column's data then free the column pointer's
     */
-    for(int col=0; col < csvf.nbr_rows; col++) {
+    for (int col = 0; col < csvf.nbr_rows; col++) {
         free(csvf.item[col]);
         csvf.item[col] = NULL;
     }
@@ -606,11 +623,11 @@ void list_del(list csvf) {
 
 /*  Very safe: both index and string length are checked
 */
-void list_copy(list lst, size_t element, char *str) {
-    if(strlen(str) > lst.len_rows)
-        ERRMSG(-1, true, "list_copy item too large for def");
-    if(element > lst.nbr_rows)
-        ERRMSG(-1, true, "list_copy item index overflowing");
+void list_update(list lst, char *str, int element) {
+    if (strlen(str) > lst.len_rows)
+        ERRMSG(-1, true, "list_update item overflows length");
+    if (element > lst.nbr_rows)
+        ERRMSG(-1, true, "list_update invalid row index");
     strcpy(lst.item[element], str);
 }
 
@@ -623,9 +640,9 @@ void list_init(list lst, ...) {
 
     va_start (ap, lst); /* make ap point to 1st unnamed arg */
 
-    for(int x=0; x<lst.nbr_rows; x++) {
+    for (int x = 0; x < lst.nbr_rows; x++) {
         strcpy(tmp.value, va_arg(ap, char*));
-        if(strlen(tmp.value) > lst.len_rows)
+        if (strlen(tmp.value) > lst.len_rows)
             ERRMSG(-1, true, "list_init item too large for def");
         strcpy(lst.item[x], tmp.value);
     }
@@ -633,24 +650,25 @@ void list_init(list lst, ...) {
     string_del(tmp);
 }
 
-/*  flines reads a text file and finds number
+/*  textlines reads a text file and finds number
     of lines and longest line.
-    used in list_read function
+    used in list_read function and not in myc.md
 */
-void flines(int count[2], char * fn) {
-    char line[1000000]; // 1MB
+void textlines(int count[2], char * fn) {
+    string line = string_def(1000000, '\0');
     int maxline = 0;
     FILE * f = open_for_read(fn);
-    while(1) {
-        fgets(line, 1000000, f);
+    while (1) {
+        fgets(line.value, 1000000, f);
         count[0]++;
-        if(feof(f)) break;
-        if(strlen(line) > maxline) {
-            maxline = strlen(line);
+        if (feof(f)) break;
+        if (strlen(line.value) > maxline) {
+            maxline = strlen(line.value);
         }
     }
     count[1] = maxline;
     fclose(f);
+    string_del(line);
 }
 
 /*
@@ -659,10 +677,10 @@ void flines(int count[2], char * fn) {
 */
 list list_read(char *filename, bool strip) {
     int c[2] = {0, 0};  // lines, longest line
-    flines(c, filename);
+    textlines(c, filename);
     list lines = list_def(c[0], c[1]);
     FILE * f = open_for_read(filename);
-    for(int x=0; x < lines.nbr_rows; x++) {
+    for (int x = 0; x < lines.nbr_rows; x++) {
         fgets(lines.item[x], lines.len_rows + 1, f);
         chomp(lines.item[x]);
         if (strip)
@@ -670,6 +688,100 @@ list list_read(char *filename, bool strip) {
     }
     fclose(f);
     return lines;
+}
+
+void list_io(list lst, char *fn, char mode) {
+    int x = 0;
+    char line[lst.len_rows];
+    if (mode == 'r') {
+        FILE * f = open_for_read(fn);
+        for( x=0; x < lst.nbr_rows; x++) {
+            fgets(line, lst.len_rows, f);
+            list_update(lst, chomp(line), x);
+        }
+        fclose(f);
+    } else if(mode == 'w') {
+        FILE * f = open_for_write(fn);
+        for( x=0; x < lst.nbr_rows; x++) {
+            fprintf(f,"%s\n",lst.item[x]);
+        }
+        fclose(f);
+    } else {
+        ERRMSG(-1, true, "list_io: invalid mode");
+    }
+}
+
+/*
+    pushes a new item value into the list
+    at a designated index ...
+    shifts list items down and drops last item
+    thus changing some of the indexes
+*/
+void list_inject(list lst, char *value, int inx) {
+    if(inx < 0 || inx >= lst.nbr_rows) {
+        ERRMSG(-1, true, "tried to inject into list with an invalid index");
+    }
+    for(int x = lst.nbr_rows - 1; x > inx; x--) {
+        strcpy(lst.item[x], lst.item[x-1]);
+    }
+    list_update(lst, value, inx);
+}
+
+/*
+    removes an item from the list at a
+    designated index ...
+    shifts list items up thus changing
+    some of the indexes
+*/
+void list_remove(list lst, int inx) {
+    int x = 0;
+    if(inx < 0 || inx >= lst.nbr_rows) {
+        ERRMSG(-1, true, "tried to remove from list with an invalid index");
+    }
+    for(x = inx; x < lst.nbr_rows - 1; x++) {
+        strcpy(lst.item[x], lst.item[x+1]);
+    }
+    lst.item[x][0] = '\0';
+}
+
+/*
+    finds an item in the list and
+    returns its index
+*/
+int list_find(list lst, char *str) {
+    int x = 0;
+    for(x = 0; x < lst.nbr_rows; x++) {
+        if(equals(lst.item[x], str))
+            return x;
+    }
+    return -1;
+}
+
+/*
+    combines list items into a field delimited string
+*/
+char *list_string(list lst, char *str, char *delim) {
+    int x = 0;
+    int has_comma, has_space, has_apost, has_quote;
+    char separator[8] = {'\0'};
+    string sbuf = string_def(lst.nbr_rows * lst.len_rows + 1, '\0');
+
+    strcpy(separator, delim);
+    strcpy(str, "\0");
+
+    for (x=0; x < lst.nbr_rows; x++) {
+        if (x == lst.nbr_rows - 1)
+            strcpy(separator, "\0"); // no delim on last item
+        if (isnum_us(lst.item[x])) {
+            concat(str, lst.item[x], separator, END);
+        } else {
+            concat(str, "\"", lst.item[x], "\"", separator, END);
+        }
+        strcat(sbuf.value, str); // building the csv string
+    }
+    strcpy(str, sbuf.value);
+    string_del(sbuf);
+    return str;
 }
 
 /*================= END list .. etc. ====================*/
@@ -681,14 +793,14 @@ int qunmark1(char *str, char delim) {
     char *t;
     int count = 0;
 
-   t = str;
-   while(*t != '\0') {
-      if (*t == 31) {
-          *t = delim;
-          count++;
-      }
-      t++;
-   }
+    t = str;
+    while (*t != '\0') {
+        if (*t == 31) {
+            *t = delim;
+            count++;
+        }
+        t++;
+    }
     return count;
 }
 
@@ -697,80 +809,80 @@ int qunmark1(char *str, char delim) {
 * r:     pointer for result storage
 * s:     pointer to string literal
 * deli:  character used for delimiting fields
-* coln:  the 'column' of the field to retrieve
+* coln:  the 'column' of the field to retrieve numeric zero relative
 * strip: boolean: strip leading/trailing whitespace before returning field
 * NOTE: Delimiter SPACE, when consecutive treated as one delimiter
 * NOTE: field does not destroy the input string
 ***/
 char * field(char *r, char * s, char deli, int coln, bool strip) {
-   int i;   // parsed delimiter (or '\0') count
-   int j;  // parsed column count
-   int k; // column length
-   char *p;  // pointer to char in haystack
-   char *t; // pointer start of field
+    int i;   // parsed delimiter (or '\0') count
+    int j;  // parsed column count
+    int k; // column length
+    char *p;  // pointer to char in haystack
+    char *t; // pointer start of field
 
-   i = j = k = 0;
-   p = t = s;
+    i = j = k = 0;
+    p = t = s;
 
-   qmark(s, deli);  // hides delimiters inside dbl quotes
+    qmark(s, deli);  // hides delimiters inside dbl quotes
 
-   while (true) {
+    while (true) {
 
-      if (*p == deli || *p == '\0') {
+        if (*p == deli || *p == '\0') {
 
-         /* Special case for delimiter == SPACE
+            /* Special case for delimiter == SPACE
             multiple ' ' act as one delimiter
-         */
-         if (deli == ' ' && *(p+1) == ' ') {
-            p++;
-            continue;
-         }
-
-         j = i;  // inc column count
-         i++;   // inc deli count
-
-         if (j == coln) {  // is this the field wanted?
-            if (j == 0) {  // time to return field
-               strncpy(r, t, k);
-               r[k] = '\0';
-            } else {
-               if ((t - s) > strlen(s)) {
-                  // this column request is out of bounds
-                  return NULL;
-               } else {
-                  strncpy(r, t, k-1);
-                  r[k-1] = '\0';
-               }
-            }
-            replacechar(s, 31, deli, 0);  // restore the original input string
-            qunmark1(r, deli);  // show quoted delimiters and remove dbl quotes
-            if (strip) {
-               return trim(r);
-            } else {
-               return r;
+            */
+            if (deli == ' ' && *(p + 1) == ' ') {
+                p++;
+                continue;
             }
 
-         } else {  // reset the marker variables
-            k = 0;  // reset "length" counter
-            t = p+1; // set next field start pointer
-         }
-      }  // end if delimiter
-      p++;
-      k++;
-   }  // end while
-}    // end field
+            j = i;  // inc column count
+            i++;   // inc deli count
+
+            if (j == coln) {  // is this the field wanted?
+                if (j == 0) {  // time to return field
+                    strncpy(r, t, k);
+                    r[k] = '\0';
+                } else {
+                    if ((t - s) > strlen(s)) {
+                        // this column request is out of bounds
+                        return NULL;
+                    } else {
+                        strncpy(r, t, k - 1);
+                        r[k - 1] = '\0';
+                    }
+                }
+                replacechar(s, 31, deli, 0);  // restore the original input string
+                qunmark1(r, deli);  // show quoted delimiters and remove dbl quotes
+                if (strip) {
+                    return trim(r);
+                } else {
+                    return r;
+                }
+
+            } else {  // reset the marker variables
+                k = 0;  // reset "length" counter
+                t = p + 1; // set next field start pointer
+            }
+        }  // end if delimiter
+        p++;
+        k++;
+    }  // end while
+}     // end field function
 
 
 int isfile(const char* name)
 {
     DIR* directory = opendir(name);
 
-    if(directory != NULL) {
-     closedir(directory);
-     return 0;
+    if (directory != NULL) {
+        closedir(directory);
+        return 0;
     }
-    if(errno == ENOTDIR) {
-     return 1;
+    if (errno == ENOTDIR) {
+        return 1;
     }
     return -1;
 }
@@ -846,14 +958,14 @@ list list_dir(const char *path, int dtype, bool sort) {
 }
 
 bool file_exists (char *filename) {
-  struct stat   buffer;
-  return (stat (filename, &buffer) == 0);
+    struct stat   buffer;
+    return (stat (filename, &buffer) == 0);
 }
 
 
 FILE * open_for_read(char *fname) {
     FILE *f1;
-    if ((f1 = fopen(fname,"r")) == NULL) {
+    if ((f1 = fopen(fname, "rb")) == NULL) {
         ERRMSG(errno, true, "open_for_read: error from fopen");
     }
     return f1;
@@ -862,7 +974,7 @@ FILE * open_for_read(char *fname) {
 
 FILE * open_for_append(char *fname) {
     FILE *f1;
-    if ((f1 = fopen(fname,"ab")) == NULL) {
+    if ((f1 = fopen(fname, "ab")) == NULL) {
         ERRMSG(errno, true, "open_for_append: error on fopen");
     }
     return f1;
@@ -871,7 +983,7 @@ FILE * open_for_append(char *fname) {
 
 FILE * open_for_write(char *fname) {
     FILE *f1;
-    if ((f1 = fopen(fname,"wb")) == NULL) {
+    if ((f1 = fopen(fname, "wb")) == NULL) {
         ERRMSG(errno, true, "open_for_write: error on fopen");
     }
     return f1;
@@ -880,7 +992,7 @@ FILE * open_for_write(char *fname) {
 
 int readfile(char *buffer, const char *filename) {
     FILE *f;
-    if ((f = fopen(filename,"rb")) == NULL) {
+    if ((f = fopen(filename, "rb")) == NULL) {
         ERRMSG(errno, false, "fopen: error on readfile");
         return -1;
     }
@@ -900,22 +1012,22 @@ int readfile(char *buffer, const char *filename) {
 int writefile(char *buffer, const char *filename, bool append) {
     FILE *f1;
     if (append) {
-        if ((f1 = fopen(filename,"ab")) == NULL) {
+        if ((f1 = fopen(filename, "ab")) == NULL) {
             ERRMSG(errno, true, "fopen: error on writefile append");
         }
     } else {
-        if ((f1 = fopen(filename,"wb")) == NULL) {
+        if ((f1 = fopen(filename, "wb")) == NULL) {
             ERRMSG(errno, true, "fopen: error on writefile");
         }
     }
-    fprintf(f1,"%s", buffer);
+    fprintf(f1, "%s", buffer);
     fclose(f1);
     return 0;
 }
 
 long filesize(const char *filename) {
     FILE *f;
-    if ((f = fopen(filename,"rb")) == NULL) {
+    if ((f = fopen(filename, "rb")) == NULL) {
         ERRMSG(errno, false, "fopen: error on filesize function");
         return -1;
     }
@@ -965,7 +1077,6 @@ char* getbasename(char *fn, bool withext) {
     }
 }
 
-
 char *getbasepath(char *fn, char *buff) {
     realpath(fn, buff);
     char *s = strrchr(buff, '/');  // find the last "/" in the path
@@ -975,12 +1086,31 @@ char *getbasepath(char *fn, char *buff) {
     return buff;
 }
 
+void filecopy(char *src, char *dst) {
+    FILE * source = open_for_read(src);
+    FILE * target = open_for_write(dst);
+    char ch;
+    while ((ch = fgetc(source)) != EOF)
+        fputc(ch, target);
+    fclose(target);
+    fclose(source);
+}
+
+void filedelete(char *file) {
+    unlink(file);
+}
+
+void filemove(char *src, char *dst) {
+    filecopy(src, dst);
+    filedelete(src);
+}
+
 
 char* chomp(char *line) {  // see also rtrim()
     // remove record separators
     size_t len = strlen(line);
     char *tmp = line;
-    for(int x=len; x >= 0; x--) {
+    for (int x = len; x >= 0; x--) {
         if (strchr("\r\n", tmp[x]) == NULL ) {
             break;
         } else {
@@ -991,50 +1121,52 @@ char* chomp(char *line) {  // see also rtrim()
 }
 
 
-char *concat(char *dest, int num, ...) {
-    char *p = dest;
+char *concat(char *dest, ...) {
+    string buf = string_def(4096, '\0');
     va_list ap;
 
-    va_start(ap, num);
+    va_start(ap, dest);
+    strcpy(dest, "\0");
 
-    strcat(p, va_arg(ap, char*));  // first one
-
-    for(int x=0; x < num-1; x++) {
-        strcat(p, va_arg(ap, char*));
+    while(1) {
+        strcpy(buf.value, va_arg(ap, char*));
+        if (equalsignore(buf.value, "END")) break;
+        strcat(dest, buf.value);
     }
 
     va_end(ap);
-    return p;
+    string_del(buf);
+    return dest;
 }
 
 
 char * deletechar(char *s, char *in, char *targ, size_t start, size_t number) {
-   char *t = s;
-   char *p = in;
-   int len = strlen(p);
-   int newlen = len;
-   int count = 0, x = 0;
+    char *t = s;
+    char *p = in;
+    int len = strlen(p);
+    int newlen = len;
+    int count = 0, x = 0;
 
-   for(x=0; x < start; x++) {
-      *t = *p;  // copy char before start index, if any
-      t++;
-      p++;
-   }
+    for (x = 0; x < start; x++) {
+        *t = *p;  // copy char before start index, if any
+        t++;
+        p++;
+    }
 
-   for(x = start; x < len; x++) {
-      if (strchr(targ, *p)) {
-        if ( number == 0 || (number > 0 && ++count <= number) ) {
-           p++;
-           newlen--;
-           continue;
+    for (x = start; x < len; x++) {
+        if (strchr(targ, *p)) {
+            if ( number == 0 || (number > 0 && ++count <= number) ) {
+                p++;
+                newlen--;
+                continue;
+            }
         }
-      }
-      *t = *p;
-      t++;
-      p++;
-   }
-   *(s+newlen) = '\0';  // reset the zero byte
-   return s;
+        *t = *p;
+        t++;
+        p++;
+    }
+    *(s + newlen) = '\0'; // reset the zero byte
+    return s;
 }
 
 
@@ -1063,17 +1195,17 @@ void timeout(int sec, void f()) {
 
 
 void multifree(int num, ...) {
-  va_list ap;
-  int i = 0;
-  char *p;
+    va_list ap;
+    int i = 0;
+    char *p;
 
-  va_start(ap, num);
-  for (i=0; i < num; i++) {
-    p = va_arg(ap, char*);
-    free(p);
-    p = NULL;
-  }
-  va_end(ap);
+    va_start(ap, num);
+    for (i = 0; i < num; i++) {
+        p = va_arg(ap, char*);
+        free(p);
+        p = NULL;
+    }
+    va_end(ap);
 }
 
 
@@ -1092,29 +1224,29 @@ void flogf(FILE * fs, char *fmt, ...) {
             continue;
         }
         switch (*++p) {
-            case 'd':
-                ival= va_arg(ap, int);
-                fprintf(fs, "%d", ival);
-                break;
-            case 'f':
-                dval= va_arg(ap, double);
-                fprintf(fs, "%f", dval);
-                break;
-            case 'l':  // long (%ld)
-                lval= va_arg(ap, long);
-                fprintf(fs, "%ld", lval);
-                break;
-            case 's':
-                for (sval = va_arg(ap, char *); *sval; sval++)
-                    fputc(* sval, fs);
-                break;
-            case '$':  // for dollor format (double)
-                dval= va_arg(ap, double);
-                fprintf(fs, "%.02f", dval);
-                break;
-            default:
-                fputc(*p, fs);
-                break;
+        case 'd':
+            ival = va_arg(ap, int);
+            fprintf(fs, "%d", ival);
+            break;
+        case 'f':
+            dval = va_arg(ap, double);
+            fprintf(fs, "%f", dval);
+            break;
+        case 'l':  // long (%ld)
+            lval = va_arg(ap, long);
+            fprintf(fs, "%ld", lval);
+            break;
+        case 's':
+            for (sval = va_arg(ap, char *); *sval; sval++)
+                fputc(* sval, fs);
+            break;
+        case '$':  // for dollor format (double)
+            dval = va_arg(ap, double);
+            fprintf(fs, "%.02f", dval);
+            break;
+        default:
+            fputc(*p, fs);
+            break;
         }
     }
     va_end (ap);  /* clean up when done */
@@ -1141,13 +1273,27 @@ int contains(char *s, char *targ) {
     if (tlen < 1)
         return 0;
 
-    while(true) {
+    while (true) {
         p = strstr(p, targ);
         if (p == NULL)
             return count;
         count++;
         p += tlen;
     }
+}
+
+/*
+    contvars returns count of delimited fields in a string
+    taking into account delimiters fount in double-quotes
+*/
+int contvars(char *str, char *delim) {
+    int count = 0;
+    if (strlen(delim) > 1)
+        ERRMSG(-1, false, "contvars delimiter length > 1");
+    qmark(str, delim[0]); // exclude quoted delimiters
+    count = contains(str, delim);
+    if (count == 0) return 0;
+    return (count + 1);
 }
 
 
@@ -1175,7 +1321,7 @@ int indexof(char* base, char* str) {
     if (p == NULL) {
         return -1;
     } else {
-        return p-base;
+        return p - base;
     }
 }
 
@@ -1187,8 +1333,38 @@ int lastindexof (char* base, char* str) {
     if (p == NULL) {
         return -1;
     } else {
-        return p-base;
+        return p - base;
     }
+}
+
+
+/*  between()
+    Gets the substring between to substrings
+    Returns index to next position
+*/
+int between(char *buf, char *input, char *str1, char *str2, int offset) {
+    int len1 = 0, len2 = 0;
+    int inx1 = 0, inx2 = 0;
+    char *s = input + offset;
+
+    len1 = strlen(str1);
+    len2 = strlen(str2);
+    inx1 = indexof(s, str1); // first target after offset
+    inx2 = indexof(s+inx1+1, str2); // 2nd target after offset
+    inx2 += inx1+1; // this now the 0 relative offset for str2
+    if (inx1 == -1 || inx2 == -1) {
+        ERRMSG(-1, false, "between - indexof failed");
+        return -1;
+    }
+    if (inx1 >= inx2) {
+        ERRMSG(-1, false, "between - inx1 >= inx2");
+        return -1;
+    }
+
+    inx1 = inx1 + len1; // offset of target substring
+    len1 = inx2 - inx1; // length for target
+    substr(buf, s, inx1, len1); // target substring stored into buf
+    return offset + inx2 + len2; // returns 1st position after str2
 }
 
 
@@ -1199,7 +1375,7 @@ int charat(char* base, char c) {
     if (p == NULL) {
         return -1;
     } else {
-        return p-base;
+        return p - base;
     }
 }
 
@@ -1207,41 +1383,41 @@ int charat(char* base, char c) {
 int lastcharat(char* base, char c) {
     char *p;
     p = strrchr(base, c);
-     if (p == NULL) {
+    if (p == NULL) {
         return -1;
     } else {
-        return p-base;
+        return p - base;
     }
 }
 
 
 char *substr(char *p, char *string, int position, int length) {
-   int c;
-   int len = strlen(string);
+    int c;
+    int len = strlen(string);
 
-   if (!(position + length < len))
+    if (!(position + length < len))
         ERRMSG(-1, true, "substr inputs out of bounds");
 
-   if (length == 0) {  // from position to end of string
-      strcpy(p, string + position);
-      return p;
-   }
+    if (length == 0) {  // from position to end of string
+        strcpy(p, string + position);
+        return p;
+    }
 
-   for (c = 0; c < length; c++) {  // return position for length
-      *(p+c) = *(string+position);
-      string++;
-   }
+    for (c = 0; c < length; c++) {  // return position for length
+        *(p + c) = *(string + position);
+        string++;
+    }
 
-   *(p+c) = '\0';
+    *(p + c) = '\0';
 
-   return p;
+    return p;
 }
 
 
 char *lowercase(char *str) {
     int i, length = strlen(str);
 
-    for(i = 0; i < length; i++) {
+    for (i = 0; i < length; i++) {
         str[i] = tolower(str[i]);
     }
     return str;
@@ -1251,7 +1427,7 @@ char *lowercase(char *str) {
 char *uppercase(char *str) {
     int i, length = strlen(str);
 
-    for(i = 0; i < length; i++) {
+    for (i = 0; i < length; i++) {
         str[i] = toupper(str[i]);
     }
     return str;
@@ -1268,40 +1444,66 @@ bool equalsignore(char *str1, char *str2) {
 }
 
 
+/*
+    Tests if a character string is a number
+    ( whole or decimal ) or not. US $ only.
+*/
+bool isnum_us(char *data) {
+    int alpha, decimal, digit, punct;
+    char item[128] = {'\0'};
+    alpha = decimal = digit = punct = 0;
+
+    strcpy(item, data);
+    trim(item);
+    alpha = strtype(item, ALPHA);
+    decimal = contains(item, ".");
+    digit = strtype(item, DIGIT);
+    punct = strtype(item, PUNCT);
+
+    if (alpha == 0 &&
+        (digit > 0 || digit == -1)) {
+        if (punct == decimal) {
+            return true;
+        }
+    }
+    return false;
+}
+
+
 bool compare(char *f1, const char *op, char *f2) {
     int r = strcmp(f1, f2);
 
-    if(strcmp(op, "==") == 0) {
+    if (strcmp(op, "==") == 0) {
         if (r == 0)
             return true;
         else
             return false;
     }
-    if(strcmp(op, "!=") == 0) {
+    if (strcmp(op, "!=") == 0) {
         if (r != 0)
             return true;
         else
             return false;
     }
-    if(strcmp(op, ">") == 0) {
+    if (strcmp(op, ">") == 0) {
         if (r > 0)
             return true;
         else
             return false;
     }
-    if(strcmp(op, "<") == 0) {
+    if (strcmp(op, "<") == 0) {
         if (r < 0)
             return true;
         else
             return false;
     }
-    if(strcmp(op, "<=") == 0) {
+    if (strcmp(op, "<=") == 0) {
         if (r <= 0)
             return true;
         else
             return false;
     }
-    if(strcmp(op, ">=") == 0) {
+    if (strcmp(op, ">=") == 0) {
         if (r >= 0)
             return true;
         else
@@ -1320,14 +1522,14 @@ char* urlencode(char* dest, char* urltext) {
     int pos = 0;
     for (int i = 0; i < strlen(urltext); i++) {
         if (('a' <= urltext[i] && urltext[i] <= 'z')
-            || ('A' <= urltext[i] && urltext[i] <= 'Z')
-            || ('0' <= urltext[i] && urltext[i] <= '9')) {
-                pout[pos++] = urltext[i];
-            } else {
-                pout[pos++] = '%';
-                pout[pos++] = hex[urltext[i] >> 4];
-                pout[pos++] = hex[urltext[i] & 15];
-            }
+                || ('A' <= urltext[i] && urltext[i] <= 'Z')
+                || ('0' <= urltext[i] && urltext[i] <= '9')) {
+            pout[pos++] = urltext[i];
+        } else {
+            pout[pos++] = '%';
+            pout[pos++] = hex[urltext[i] >> 4];
+            pout[pos++] = hex[urltext[i] & 15];
+        }
     }
     pout[pos] = '\0';
     return pout;
@@ -1376,7 +1578,7 @@ char *insert_new(char *s, char *ins, size_t inx) {
 *    N = number found
 *   -1 = all found
 ***/
-enum styp {ALPHA, ALNUM, DIGIT, PRINT, SPACE, UPPER, LOWER, PUNCT};
+// enum styp {ALPHA, ALNUM, DIGIT, PRINT, SPACE, UPPER, LOWER, PUNCT};
 
 int strtype(char *buf, int istype) {
     size_t len;
@@ -1388,64 +1590,64 @@ int strtype(char *buf, int istype) {
         return 0;
 
     switch (istype) {
-        case ALPHA:
-            for(int x=0; x < len; x++) {
-                if (isalpha(buf[x])) {
-                    count++;
-                }
+    case ALPHA:
+        for (int x = 0; x < len; x++) {
+            if (isalpha(buf[x])) {
+                count++;
             }
-            break;
-        case ALNUM:
-            for(int x=0; x < len; x++) {
-                if (isalnum(buf[x])) {
-                    count++;
-                }
+        }
+        break;
+    case ALNUM:
+        for (int x = 0; x < len; x++) {
+            if (isalnum(buf[x])) {
+                count++;
             }
-            break;
-        case DIGIT:
-            for(int x=0; x < len; x++) {
-                if (isdigit(buf[x])) {
-                    count++;
-                }
+        }
+        break;
+    case DIGIT:
+        for (int x = 0; x < len; x++) {
+            if (isdigit(buf[x])) {
+                count++;
             }
-            break;
-        case PRINT:
-            for(int x=0; x < len; x++) {
-                if (isprint(buf[x])) {
-                    count++;
-                }
+        }
+        break;
+    case PRINT:
+        for (int x = 0; x < len; x++) {
+            if (isprint(buf[x])) {
+                count++;
             }
-            break;
-        case SPACE:
-            for(int x=0; x < len; x++) {
-                if (isspace(buf[x])) {
-                    count++;
-                }
+        }
+        break;
+    case SPACE:
+        for (int x = 0; x < len; x++) {
+            if (isspace(buf[x])) {
+                count++;
             }
-            break;
-        case UPPER:
-            for(int x=0; x < len; x++) {
-                if (isupper(buf[x])) {
-                    count++;
-                }
+        }
+        break;
+    case UPPER:
+        for (int x = 0; x < len; x++) {
+            if (isupper(buf[x])) {
+                count++;
             }
-            break;
-        case LOWER:
-            for(int x=0; x < len; x++) {
-                if (islower(buf[x])) {
-                    count++;
-                }
+        }
+        break;
+    case LOWER:
+        for (int x = 0; x < len; x++) {
+            if (islower(buf[x])) {
+                count++;
             }
-            break;
-        case PUNCT:
-            for(int x=0; x < len; x++) {
-                if (ispunct(buf[x])) {
-                    count++;
-                }
+        }
+        break;
+    case PUNCT:
+        for (int x = 0; x < len; x++) {
+            if (ispunct(buf[x])) {
+                count++;
             }
-            break;
-        default:
-            ERRMSG(-1, true, "invalid strtype enum value");
+        }
+        break;
+    default:
+        ERRMSG(-1, true, "invalid strtype enum value");
     }
     if (count == len) return -1;  // entire alpha
     return count;  // will be > -1 and less than len
@@ -1468,7 +1670,7 @@ int strtype(char *buf, int istype) {
     convert integer to string using automatic memory
 */
 char *intstr(char *buf, int n, bool separator) {
-    if(separator) {
+    if (separator) {
         setlocale(LC_NUMERIC, "");
         sprintf(buf, "%'d", n);
     } else
@@ -1482,7 +1684,7 @@ char *intstr(char *buf, int n, bool separator) {
 char *intstr_new(int n, bool separator) {
     int len = snprintf( NULL, 0, "%d", n );
     char* buf = malloc( len + 1 );
-    if(separator) {
+    if (separator) {
         setlocale(LC_NUMERIC, "");
         sprintf(buf, "%'d", n);
     } else
@@ -1494,7 +1696,7 @@ char *intstr_new(int n, bool separator) {
     convert long to string using automatic memory
 */
 char *lngstr(char *buf, long n, bool separator) {
-    if(separator) {
+    if (separator) {
         setlocale(LC_NUMERIC, "");
         sprintf(buf, "%'ld", n);
     } else
@@ -1508,7 +1710,7 @@ char *lngstr(char *buf, long n, bool separator) {
 char *lngstr_new(long n, bool separator) {
     int len = snprintf( NULL, 0, "%ld", n );
     char* buf = malloc( len + 1 );
-    if(separator) {
+    if (separator) {
         setlocale(LC_NUMERIC, "");
         sprintf(buf, "%'ld", n);
     } else
@@ -1521,7 +1723,7 @@ char *lngstr_new(long n, bool separator) {
 */
 char *dblstr(char *buf, double n, int decimal, bool separator) {
     char fmt[32];
-    if(separator) {
+    if (separator) {
         setlocale(LC_NUMERIC, "");
         sprintf(fmt, "%s%d%s", "%'.0", decimal, "lf");
     } else {
@@ -1539,7 +1741,7 @@ char *dblstr_new(double n, int decimal, bool separator) {
     sprintf(fmt, "%s%d%s", "%.0", decimal, "lf");
     int len = snprintf( NULL, 0, fmt, n );
     char* buf = malloc( len + 1 );
-    if(separator) {
+    if (separator) {
         setlocale(LC_NUMERIC, "");
         sprintf(fmt, "%s%d%s", "%'.0", decimal, "lf");
     } else {
@@ -1547,6 +1749,160 @@ char *dblstr_new(double n, int decimal, bool separator) {
     }
     sprintf(buf, fmt, n);
     return buf;
+}
+
+/*
+                                  _   _
+             ____   ___   _ __   (_) | |_   _   _
+            |_  /  / _ \ | '_ \  | | | __| | | | |
+             / /  |  __/ | | | | | | | |_  | |_| |
+            /___|  \___| |_| |_| |_|  \__|  \__, |
+                                            |___/
+Simple Gtk Dialogs
+https://help.gnome.org/users/zenity/stable/index.html.en#dialogs
+----------------------------------------------------------------
+zenmsg      message dialog 4 types: "question", "error", "warning", "info"
+zenfile     filedialog 2 types: open (false) and save (true)
+zenform     form dialog: entry, calendar, list, combo
+zenlist     list dialog with columns
+zentry      1 field entry dialog (prompt?)
+zentext     simple multi-line text dialog
+zenotify    display a system notification message
+zen         all-purpose zenity
+
+*/
+
+/* runproc
+    function --------------------------------------------------------
+*/
+void runproc(char *output, char *proc) {
+    FILE *fp;
+
+    fp = popen(proc, "r");
+    if (fp == NULL) {
+        ERRMSG(-1, true, "runproc failure");
+    }
+    fgets(output, 4096, fp);
+    pclose(fp);
+}
+
+/* zenmsg
+    function --------------------------------------------------------
+*/
+int zenmsg(char *title, char *msg, char *type) {
+    char cmd[512];
+    int rc = 0;
+
+    sprintf(cmd, "zenity --%s --title '%s' --text '%s'", type, title, msg);
+    rc = system(cmd);
+    return rc;  // question "No" returns 256, all others return 0
+}
+
+/* z-entry
+    function --------------------------------------------------------
+*/
+char *zentry(char *entry, char *title, char *text, char *starting) {
+    char cmd[512];
+
+    strcpy(entry, "None");
+    sprintf(cmd, "zenity --entry --title='%s' --text='%s' --entry-text '%s'",
+            title, text, starting);
+    runproc(entry, cmd);
+    chomp(entry);
+    return entry;
+}
+
+/* zenfile
+    function --------------------------------------------------------
+*/
+void zenfile(char *selected, char *start, bool savemode, bool dirmode) {
+    char cmd[512];
+
+    if (savemode) {
+        if (dirmode)
+            sprintf(cmd, "zenity --file-selection --directory --save --title=\"Save File\" --filename=%s", start);
+        else
+            sprintf(cmd, "zenity --file-selection --save --title=\"Save File\" --filename=%s", start);
+    } else {
+        if (dirmode)
+            sprintf(cmd, "zenity --file-selection --directory --title=\"Select a File\" --filename=%s", start);
+        else
+            sprintf(cmd, "zenity --file-selection --title=\"Select a File\" --filename=%s", start);
+    }
+    runproc(selected, cmd);
+    chomp(selected);
+}
+
+/* zenform
+    function --------------------------------------------------------
+*/
+void zenform(char *formdata, char *layout) {
+    char cmd[4096];
+
+    sprintf(cmd, "zenity --forms %s", layout);
+    runproc(formdata, cmd);
+    chomp(formdata);
+}
+
+/* zenlist
+    function --------------------------------------------------------
+*/
+void zenlist(char *selected, char *layout) {
+    char cmd[4096];
+
+    sprintf(cmd, "zenity --list %s", layout);
+    runproc(selected, cmd);
+    chomp(selected);
+}
+
+/* zentext
+    function --------------------------------------------------------
+*/
+void zentext(char* content, char *title, char *filename, bool edit) {
+    FILE *fp;
+    char line[4096] = {'\0'};
+    char cmd[4096] = {'\0'};
+
+    if (edit) {
+        sprintf(cmd, "zenity --text-info --title='%s' --editable --filename='%s'",
+                title, filename);
+        strcpy(content, "\0");
+        fp = popen(cmd, "r");
+        if (fp == NULL)
+            ERRMSG(-1, true, "zentext: popen failed");
+        do {
+            fgets(line, 4096, fp);
+            if (feof(fp)) break;
+            strcat(content, line);
+        } while (1);
+        pclose(fp);
+    } else {
+        sprintf(cmd, "zenity --text-info --title='%s' --filename='%s'",
+                title, filename);
+        system(cmd);
+    }
+}
+
+/* zenotify
+    function --------------------------------------------------------
+*/
+void zenotify(char *text, bool icon) {
+    char cmd[512];
+
+    if (icon) {
+        sprintf(cmd, "zenity --notification --window-icon='info' --text='%s'", text);
+    } else {
+        sprintf(cmd, "zenity --notification --text='%s'", text);
+    }
+    system(cmd);
+}
+
+void zen(char *buf, char *code) {
+    char cmd[4096];
+
+    sprintf(cmd, "zenity %s", code);
+    runproc(buf, cmd);
+    chomp(buf);
 }
 
 #endif
