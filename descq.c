@@ -22,6 +22,8 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE
 #define TWOKB 2048
 #define ONEMB 1000000
 #define MAXURLS 200
+#define HIST_LIMIT 10
+#define HIST_SIZE 128
 
 // glade xml file
 // prepared with cbigstr.py
@@ -213,9 +215,10 @@ int cmdline = 0;  // 1 is command line, 0 is GUI
 int rsp = 0;
 int g_win_level = 0;
 char descq_path[128];
-// action history buff
-char g_last_entry[128] = {0};  // save user's last command only
 
+// entry history
+list hist;
+int inx = HIST_LIMIT - 1;;
 
 // Add a seach text to hist.txt file
 void write_history(char *text) {
@@ -237,6 +240,11 @@ void write_history(char *text) {
        fprintf(fh, "%s\n", rec[x]);
     }
     fclose(fh);
+    // store for entry history
+    if(list_find(hist, text) == -1) { // not in list yet so add it
+        list_inject(hist, text, 0);
+        inx = HIST_LIMIT - 1;
+    }
 }
 
 
@@ -481,6 +489,11 @@ int main(int argc, char *argv[])
     // load text editor name
     change_editor();
 
+    // load entry history from file
+    hist = list_def(HIST_LIMIT, HIST_SIZE);
+    if(file_exists("ehist.txt"))
+        list_io(hist, "ehist.txt", 'r');
+
     gtk_main();
 
     return 0;
@@ -492,9 +505,14 @@ int main(int argc, char *argv[])
 
 // called when window is closed
 void on_window1_destroy() {
+    list_io(hist, "ehist.txt", 'w');
+    list_del(hist);
     gtk_main_quit();
 }
 
+void on_btn_dlg_close_clicked() {
+    gtk_widget_hide(g_dialog_box);
+}
 
 void displayListDlg(char * target) {
     GtkListBoxRow *g_row;
@@ -619,9 +637,6 @@ void process_entry(char *out_str) {
     int w_left;
     int w_width;
     int w_height;
-
-
-    strcpy(g_last_entry, out_str);  // copy command into g_last_entry
 
     if (equalsignore(out_str, "list")) {        // list urls
         displayListDlg("urls");
@@ -758,9 +773,6 @@ void on_dlg_listbox_row_activated(GtkListBox *oList, GtkListBoxRow *oRow) {
     strcpy(listdata, gtk_label_get_text(GTK_LABEL(bin)));
     gtk_clipboard_set_text(g_clipboard, listdata, -1);
     if (startswith(listdata, "http")) {  // LIST item
-        // strcpy(url, "xdg-open ");
-        // strcat(url, listdata);
-        // strcat(url, " &");  // do not wait for system to finish
         concat(url, "xdg-open ", listdata, " &", END);
         system(url);
     } else {  // SERV item
@@ -801,6 +813,20 @@ void on_btn_entry_clicked() {
 _Bool on_window1_key_press_event(GtkWidget *w, GdkEvent *e) {
     guint keyval;
 
+    // change entry history index from arrow keys
+    int move_inx(int direction, int inx) {
+        if(direction == 0) { // (0) arrow UP "backwards"
+            inx++;
+            if(inx >= HIST_LIMIT)
+                inx = 0;
+        } else { // (1) arrow DOWN "forwards"
+            inx--;
+            if(inx < 0)
+                inx = 0; // Stop at most current
+        }
+        return inx;
+    }
+
     gdk_event_get_keyval (e, &keyval);
     //printf("%d\n", keyval);
 
@@ -810,12 +836,14 @@ _Bool on_window1_key_press_event(GtkWidget *w, GdkEvent *e) {
     }
 
     if (keyval == 65364) {  // DOWN ARROW
-        gtk_entry_set_text(GTK_ENTRY(g_entry), g_last_entry);
+        inx = move_inx(1, inx);
+        gtk_entry_set_text(GTK_ENTRY(g_entry), hist.item[inx]);
         return TRUE;
     }
 
     if (keyval == 65362) {  // UP ARROW
-        gtk_entry_set_text(GTK_ENTRY(g_entry), g_last_entry);
+        inx = move_inx(0, inx);
+        gtk_entry_set_text(GTK_ENTRY(g_entry), hist.item[inx]);
         return TRUE;
     }
 
@@ -825,10 +853,4 @@ _Bool on_window1_key_press_event(GtkWidget *w, GdkEvent *e) {
     }
 
     return FALSE;
-}
-
-
-// Exit the program
-void on_btn_dlg_close_clicked() {
-    gtk_widget_hide(g_dialog_box);
 }
