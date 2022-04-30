@@ -14,6 +14,7 @@ This is free software; see the source for copying conditions.  There is NO
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE
 */
 #include <myc.h>
+#include <mynet.h>
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
 
@@ -240,11 +241,6 @@ void write_history(char *text) {
        fprintf(fh, "%s\n", rec[x]);
     }
     fclose(fh);
-    // store for entry history
-    if(list_find(hist, text) == -1) { // not in list yet so add it
-        list_inject(hist, text, 0);
-        inx = HIST_LIMIT - 1;
-    }
 }
 
 
@@ -557,28 +553,61 @@ void displayListDlg(char * target) {
     gtk_widget_hide (g_dialog_box);
 }
 
+char *get_page_title(char *buf, char *url) {
+    const size_t bufsize = 1000000; // buffer to hold page html content
+    // use 'webpage' to get the pages <title> text
+    string pagebuf = string_def(bufsize, '\0');
+    if (!webpage(pagebuf.value, bufsize, url)) {
+      ERRMSG(-1, false, "get_page_title: 'webpage' failure\n");
+      string_del(pagebuf);
+      return url;
+    } else {
+      // puts(pagebuf.value);
+      int p = between(buf, pagebuf.value, "<title>", "</title>", 0);
+      if(p == -1) {
+        ERRMSG(-1, false, "get_page_title: could not find title tag");
+        string_del(pagebuf);
+        return url;
+      }
+    }
+    string_del(pagebuf);
+    return buf;
+}
 
-void write_url(char *text) {  // Save url to urls.txt file and online file
+/*  WRITE TO URL FILE
+    save the url with its title
+    into urls.txt file
+*/
+void write_url(char *text) {  // Save url to urls.txt file
     FILE *fh;
     char rec[1000][TWOKB];
     int count = 0;
+    char title[1024] = {'\0'};
+    const size_t bufsize = 1000000; // buffer to hold page html content
     fh = open_for_read("data/urls.txt");
     while(1) {
         fgets(rec[count], TWOKB, fh);
         if (feof(fh)) break;
         chomp(rec[count++]);  // remove newline character
         if (count > 990)
-            ERRMSG(99, true, "Too many URLs for urls.txt!");
+            ERRMSG(-1, true, "Too many URLs for urls.txt!");
     }
     fclose(fh);
+
+    // use mynet.h webpage to get the title
+    get_page_title(title, text);
+    if(strlen(title) > 5)
+        concat(title, " <=> ", text, END);
+    else
+        strcpy(title, text);
+
     fh = open_for_write("data/urls.txt");
-    fprintf(fh, "%s\n", text);
+    fprintf(fh, "%s\n", title);
     for(int x=0; x < count; x++) {
        fprintf(fh, "%s\n", rec[x]);
     }
     fclose(fh);
 }
-
 
 // Save clipboard text contents to "clip.txt" file
 void save_clipboard_to_file() {
@@ -591,10 +620,15 @@ void save_clipboard_to_file() {
         return;
     }
     strcpy(cliptxt, gtk_clipboard_wait_for_text(g_clipboard));
-    fh = open_for_append("data/clip.txt");
-    fprintf(fh,"%s\n\n", cliptxt);
-    fclose(fh);
-    free(cliptxt);
+    if (startswith(cliptxt, "http")) {
+        write_url(cliptxt);
+        free(cliptxt);
+    } else {
+        fh = open_for_append("data/clip.txt");
+        fprintf(fh,"%s\n\n", cliptxt);
+        fclose(fh);
+        free(cliptxt);
+    }
 }
 
 // "Close" was clicked in messagebox
@@ -637,6 +671,14 @@ void process_entry(char *out_str) {
     int w_left;
     int w_width;
     int w_height;
+
+    // store for entry history
+    if(!equals(out_str, "x")) {
+        if(list_find(hist, out_str) == -1) { // not in list yet so add it
+            list_inject(hist, out_str, 0);
+            inx = HIST_LIMIT - 1;
+        }
+    }
 
     if (equalsignore(out_str, "list")) {        // list urls
         displayListDlg("urls");
@@ -739,7 +781,7 @@ void on_entry_activate(GtkEntry *entry) {
     The user has typed something into the entry field and hit Enter.
     (or might have clicked the button instead of hitting Enter)
     Determine if it is a:
-    1. descq command (e.g. list ...)
+    1. bcb command (e.g. list ...)
     2. alias from the serv.txt file
     3. Internet search text
     */
@@ -772,8 +814,14 @@ void on_dlg_listbox_row_activated(GtkListBox *oList, GtkListBoxRow *oRow) {
     bin = gtk_bin_get_child(GTK_BIN(oRow));
     strcpy(listdata, gtk_label_get_text(GTK_LABEL(bin)));
     gtk_clipboard_set_text(g_clipboard, listdata, -1);
-    if (startswith(listdata, "http")) {  // LIST item
-        concat(url, "xdg-open ", listdata, " &", END);
+    // LIST (URLS) item
+    if ((indexof(listdata, " <=> http") >= 0) || (startswith(listdata, "http"))) {
+        if (ptr = strstr(listdata, " <=> ")) {
+            ptr += 5;
+        } else {
+            ptr = listdata;
+        }
+        concat(url, "xdg-open ", ptr, " &", END);
         system(url);
     } else {  // SERV item
         if (ptr = strchr(listdata, ',')) {
@@ -802,9 +850,8 @@ void on_btn_entry_clicked() {
     gchar out_str[TWOKB] = {0};
     sprintf(out_str, "%s", gtk_entry_get_text(GTK_ENTRY(g_entry)));
     trim(out_str);  // stringalt.h
-    if (equals(out_str, "")) {  // Try to save clipboard contents to clip.txt
-        // when entry field is empty.
-        save_clipboard_to_file();
+    if (equals(out_str, "")) {  // when entry field is empty.
+        save_clipboard_to_file();  // Save clipboard contents to clip.txt
     } else {
         on_entry_activate(GTK_ENTRY(g_entry));  // else treat it as Enter key pressed
     }

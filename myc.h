@@ -1126,7 +1126,7 @@ char *concat(char *dest, ...) {
     va_list ap;
 
     va_start(ap, dest);
-    strcpy(dest, "\0");
+    // NOTE: dest MUST BE INITIALIZED
 
     while(1) {
         strcpy(buf.value, va_arg(ap, char*));
