@@ -232,7 +232,7 @@ void write_history(char *text) {
         if (feof(fh)) break;
         chomp(rec[count++]);  // remove newline character
         if (count > 990)
-            ERRMSG(99, true, "Too many history entries!");
+            ERRMSG(-1, true, "Too many history entries!");
     }
     fclose(fh);
     fh = open_for_write("data/hist.txt");
@@ -596,6 +596,7 @@ void write_url(char *text) {  // Save url to urls.txt file
 
     // use mynet.h webpage to get the title
     get_page_title(title, text);
+    deletechar(title, title, "\n", 0, 0);
     if(strlen(title) > 5)
         concat(title, " <=> ", text, END);
     else
@@ -677,6 +678,7 @@ void process_entry(char *out_str) {
         if(list_find(hist, out_str) == -1) { // not in list yet so add it
             list_inject(hist, out_str, 0);
             inx = HIST_LIMIT - 1;
+            list_io(hist, "ehist.txt", 'w'); // not getting writen on destroy...
         }
     }
 
