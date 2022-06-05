@@ -24,7 +24,7 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE
 #define ONEMB 1000000
 #define MAXURLS 200
 #define HIST_LIMIT 10
-#define HIST_SIZE 128
+#define HIST_SIZE 1024
 
 // glade xml file
 // prepared with cbigstr.py
