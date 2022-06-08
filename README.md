@@ -200,10 +200,11 @@ The entries in _serv.txt_ take two forms:
  p,Php,http://php.net/manual-lookup.php?pattern=
  
  m,Google Maps,https://www.google.com/maps/search/
+ 
  ```
 Use like this:
 
->**a:**mini computers  
+**a:**mini computers  
 **i:**wallpaper for Linux Mint  
 **p:**preg_split  
 **m:**arlington, tx  
