@@ -1,16 +1,17 @@
-# descq
+# _descq_ documentation
 ### for Linux
-#### Streamline Workflow
-descq (DeskQ) is a desktop GUI-Internet-search-window  
-with added productivity like clipboard archiving  
-and retrieval, and custom command aliasing.
 
-**Features:**
-1.  Save URLs and recall them later
-1.  Save text from the clipboard and access later
-1.  Start an Internet search (keeps history)
-1.  Set up searches for specific services (like: Google Maps...)
-1.  Set up aliases to launch programs, documents, or URLs
+_descq_ is a GUI entry field that you position on your Linux desktop from which you
+can search the Internet or submit commands to your computer.
+
+For the __Windows__ version see https://github.com/MLeidel/BCBW
+
+**Features:** 
+1. Save URLs and recall them later
+1. Save clipboard text and access later
+1. Start Internet searches (keeps history)
+1. Set up searches for specific services (like: Maps, Images, Amazon, ...)
+1. Set up commands to launch apps, sys commands, or URLs
 
 > 3 - 5 are also available at the command line.
 
@@ -20,31 +21,33 @@ download and install the .deb file.
 
 ---
 
-descq is written in C including Gtk3
+descq is written in C and uses Gtk3 - so
+it integrates nicely with Linux Gtk based
+desktops.
 
 ---
 
-You might want to configure descq to run on system startup
-or link it to a hotkey.
+Type __cap__ to _toggle_ the 
+window caption bar on and off.
+Position descq on your desktop.
+Then type __winset__ to save the windows geometry and 
+caption status (_winmet.txt_.) 
 
----
+![caption](images/Deskq_cap.png) 
+![desktop](images/deskq_on_my_desktop.png) 
 
-To re-position use the `cap` command to toggle the
-window caption bar on and off for window positioning.
-The **`winset`** command saves the windows geometry and
-caption status in winmet.txt.
+> *above descq was positioned along side an xfce panel.* 
 
-![caption](images/Deskq_cap.png)
-![desktop](images/deskq_on_my_desktop.png)
-*Here is descq positioned along side the xfce panel.*
+## descq commands:
 
-**descq commands:**
+Activate the request you've typed by hitting
+_Enter_, _Tab_, or click the _action-button_ &#9744;.
 
-| command/text | action/description |
+| Type this | action/description |
 | :----- | :---- |
 |_a URL_|saves URL to a list|
 |_search text_|starts a search in browser|
-|**sc** or _action button_|saves clipboard contents|
+|**sc** or _action-button_|saves clipboard contents|
 |**list**|opens dialog with list of saved URLs|
 |**hist**|opens dialog with list of saved search texts|
 |**serv**|opens dialog with list of your commands|
@@ -58,177 +61,207 @@ caption status in winmet.txt.
 |**ee**|edit edit the name of your text editor (editor.txt)|
 |**top**|toggles the window level to Top or Bottom|
 |**help**|view this help|
-|**up/dn arrow** key|recall last command or search|
+|**=**|Calculator eg. =2^2|
+|**up/dn arrow** key|recall last 10 entries|
 |**Esc** key|clear entry field|
 
 ---
 
-_Use the **`hist`** command to pop up a dialog of your
-saved searches. Click to search again._
-![history](images/historyShot.png "hist")
+## Search Requests and Command Requests
 
-## System commands and website directed searches
+Type a web search into the entry box and hit Enter.
 
-Use **`es`** to edit `serv.txt` file.
+Multiple searches or commands are made by delimiting 
+each with "|"
 
-The `serv.txt` file holds your aliases for
-custom commands and URLs.
-The entries in `serv.txt` take two forms:
-- Aliases: URL links and system commands
-- Website Directed Searches
+>For example, perform three searches with one command: 
+**dogs|cats|tadpoles**
 
-### Aliases
-  Aliases can be either URLs or system commands.
+---
 
-  The general format is
+Directly execute an app installed on your system 
+by prefixing it with one of these characters:  
+"$" or "@" or ">"
 
-  _Alias_, {URL | fullpath-command-line_}
+For example: **>gimp**  
+or **>gedit**
 
-  To create an alias first invent a name for
-  the command. The name is simply a "key" (alias)
-  that you will type in to launch the command.
+---
 
-  #### examples from a serv.txt file:
-  ```text
-    git,https://github.com
-    dev,dev.sh
-    shutdown,  shutdown now
-    reboot,reboot
-    drive, https://drive.google.com
-  ```
+Evaluate math expressions using a leading "=" 
+followed by the expression.
 
-  To perform these commands in descq you would type in
-  the alias and hit Enter or click the action button.
-  Deskq will match on _leading_ characters or substrings
-  of your alias.
-  _Note: if you create an alias in serv.txt and then
-  mistype it when using it, the mistyped alias will
-  be treated as a __search__ and launch it in the
-  browser._
+example:  
+_=24.5^3 / 2.2_
 
-  Using the example aliases above:
-
-  | typed | resulting action |
-  | :---------- | :-------------------- |
-  |`git`|opens github.com in your browser|
-  |`dev`|executes your shell script to ... ?|
-  | `shut`|shuts down your machine|
-  |`shutdo`|shuts down your machine|
-  |`sh`|shuts down your machine|
-  |`reboot`|reboots your machine|
-  |`reb`|reboots your machine|
-
-  It helps to create your commands in "serv.txt"
-  in assending order which should allow for unique substrings
-  as your commands become familiar from use.
-
-  ---
-
-  Searches and/or aliases can be combined by delimiting
-  with "|" eg. **git|dev|someothercommand|...**
-
-  Perform three searches with one command:
-  **dogs|cats|tadpoles**
-
-  ---
-
-  Directly execute an app installed on your system
-  and in the system path like this:
-
-  `$app`
-
-  For example: `$gimp`
-
-  "$" can be "$" or "@" or ">"
-
-  ---
-  
-  Evaluate math expressions using a leading "="  
-  followed by the expression:
-  
-  `=24.5^3 / 2.2`
-  
-  ---
-  
-### Website directed searches
-  These are URLs that may have a ?querystring after
-  the domain and path part.  In `serv.txt` the
-  first character of each line must begin with
-  a single letter (a-z, 1-0).
-
-  The general format is:
-
-  _?,name,website-URL + query-string..._
-  where ? = a unique letter a-z, A-Z, 0-9
-
-  _**You may have to experiment with each website to learn
-  how it formats their search querystring.**_
-
-  #### Some examples:
-
-  `a,Amazon,https://smile.amazon.com/s/ref=nb_sb_noss_1?field-keywords=`
-
-  `i,Google Images,http://images.google.com/images?q=`
-
-  `p,Php,http://php.net/manual-lookup.php?pattern=`
-
-  `m,Google Maps,https://www.google.com/maps/search/`
-
-  ![services](images/servicex1.png)
-
-For example: __m:arlington, TX__
-
-It may take a little work to discover some of these
-querystrings but many do exist. DeskQ comes with
-several already set up.
+---
 
 ### Save and recall URLs and text clippings.
 
-To save a URL copy or type it into descq and hit Enter.
-To view and re-open saved URLs type **`list`** into descq and hit Enter.
+- To save a URL copy or type it into descq and hit Enter. 
+- To view and re-open saved URLs type **list** into descq and hit Enter. 
 
 
-To save text from your system clipboard just type **`sc`**
-or click the action button with the entry field empty.
+To save text from your system clipboard type **sc**  
+or click the action-button &#9744; (with the _entry field empty_.) 
 
-To view/edit text you've saved just type **`ec`** Enter.
-Your text editor will pop-up with all of your clips.
+To view/edit saved text type **ec**.  
+Your text editor will pop-up with the _clip.txt_ file.
+
+---
+
+Use the **hist** command to pop up a dialog of your 
+saved searches. Click to search again. 
+
+![history](images/historyShot.png "hist")
+
+---
+
+### Command aliases and website directed searches
+
+Type **es** to edit the _serv.txt_ file. 
+
+The _serv.txt_ file holds your aliases with 
+custom commands and URLs.  
+The entries in _serv.txt_ take two forms:
+1. Aliases: URL links and system commands
+1. Website Directed Searches
+
+### Aliases 
+ Aliases can be either URLs or system commands. 
+ 
+ The general format is
+ 
+ **_Alias_, {URL | _fullpath-command-line_}** 
+ 
+ To create an alias first invent a name for 
+ the command. The name is simply a "key" (alias) 
+ that you will type in to launch the command.
+ 
+ #### examples from a serv.txt file: 
+ 
+ ```python
+  git,https://github.com 
+  dev,dev.sh 
+  shutdown, shutdown now 
+  reboot,reboot 
+  drive, https://drive.google.com
+ ```
+ 
+ To perform these commands in descq you would type in 
+ the alias and hit Enter or click the action button. 
+ _descq_ will match on _leading_ characters or substrings 
+ of your alias. 
+ >Note: if you create an alias in _serv.txt_ and then 
+ mistype it when using it, the mistyped alias will 
+ be treated as a __search__ and launch it in the 
+ browser.
+ 
+ Using the above example aliases:
+  
+ | typed | resulting action |
+ | :---------- | :-------------------- |
+ |_git_|opens github.com in your browser| 
+ |_dev_|executes your shell script to ... ?| 
+ | _shut_|shuts down your machine| 
+ |_shutdo_|shuts down your machine| 
+ |_sh_|shuts down your machine| 
+ |_reboot_|reboots your machine|
+ |_reb_|reboots your machine|
+ 
+ It helps to create your commands in _serv.txt_
+ in assending order which should allow for unique substrings 
+ as your commands become familiar from use.
+ 
+ ---
+ 
+### Website directed searches
+ These are URLs that may have a ?querystring after 
+ the domain and path part. To setup a web directed
+ search in _serv.txt_ make sure that the 
+ first character of each line begins with 
+ a single letter (a-z, 1-0). 
+ 
+ The general format is:
+ 
+ __letter,name,website-URL + query-string...__ 
+ where _letter_ = a unique letter a-z, A-Z, 0-9
+ 
+ _**You may have to experiment with each website to learn 
+ what format they expect for search queries**_ 
+ 
+ #### Some examples: 
+ 
+ ```python
+ a,Amazon,https://smile.amazon.com/s/ref=nb_sb_noss_1?field-keywords=
+ 
+ i,Google Images,http://images.google.com/images?q=
+ 
+ p,Php,http://php.net/manual-lookup.php?pattern=
+ 
+ m,Google Maps,https://www.google.com/maps/search/
+ ```
+Use like this:
+
+- __a:__mini computers
+- __i:__wallpaper for Linux Mint
+- __p:__preg_split
+- __m:__arlington, tx
+
+Note that what ever you enter after __letter:__ will get
+appended to the website querystring that you've set up
+in _serv.txt_.
+ 
+ ![services](images/servicex1.png)
+
+It may take a little work to discover some of these 
+querystrings but many do exist. _descq_ comes with 
+several already set up.
+
+---
 
 #### Specify the text editor
-The "e_" commands for DeskQ require a simple text editor.
-Put the name of your installed text editor into the first
-line of the `editor.txt` file. It comes with `gedit` in the file.
-* _examples:_
-  `subl`
-  `gedit`
-  `xed`
-  `atom`
-  `gedit`
-  `whatever`
+The _"e\_"_ commands for _descq_ require a simple text editor.  
+Put the name of your installed text editor into the first 
+line of the _editor.txt_ file.  
+___gedit___ is preset.  
+
+To change this later use the "ee" command.
+
+---
 
 #### Specify the Search Engine
-The search engine query string is set to DDG
-by default. You can change it by editing
-the `search.txt` file to the query string
-for your favorite search engine.
+Descq uses the DuckDuckGo search engine as default.
+Edit "search.txt" (or use the __ee__ command) to change it to
+some other URL such as:
 
-One of the advantages of DDG is its
-BANG query feature. Checkout
-https://duckduckgo.com/bang
-to find out how it works. Very cool!
+   - https://www.google.com/search?q=
+   - https://duckduckgo.com/?q=
+   - https://www.bing.com/search?q=
+   - https://scholar.google.com/scholar?q=
+   - https://search.yahoo.com/search?p=
+
+---
+
+One of the advantages of DDG is its 
+BANG query feature. Checkout 
+https://duckduckgo.com/bang 
+to find out how it works.
 
 #### List of descq System Files
 
-| |  |
+| | |
 | ----- | ----- |
-|`clip.txt`|text file of clippings|
-|`descq`|Linux executable|
-|`hist.txt`|text file of search history|
-|`serv.txt`|text file of $ commands and special querys|
-|`winmet.txt`|window geometry ...|
-|`editor.txt`|name of your text editor program|
-|`urls.txt`|text file of saved URLs|
-|`search.txt`|querystring to search with you favorite search engine|
+|_ clip.txt_ |text file of clippings|
+|_ descq_ |Linux executable|
+|_ hist.txt_ |text file of search history|
+|_ serv.txt_ |text file of $ commands and special querys|
+|_ winmet.txt_ |window geometry ...|
+|_ editor.txt_ |name of your text editor program|
+|_ urls.txt_ |text file of saved URLs|
+|_ search.txt_ |querystring to search with you favorite search engine|
 
 
 #### end
+
+ 
