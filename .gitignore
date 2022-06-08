@@ -57,6 +57,6 @@ build
 recoverdata
 refresh
 savedata
-*.deb
+getmd
 dqurls.py
 
