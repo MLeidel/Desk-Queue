@@ -203,10 +203,10 @@ The entries in _serv.txt_ take two forms:
  ```
 Use like this:
 
-- __a:__mini computers
-- __i:__wallpaper for Linux Mint
-- __p:__preg_split
-- __m:__arlington, tx
+>**a:**mini computers  
+**i:**wallpaper for Linux Mint  
+**p:**preg_split  
+**m:**arlington, tx  
 
 Note that what ever you enter after __letter:__ will get
 appended to the website querystring that you've set up
@@ -252,14 +252,14 @@ to find out how it works.
 
 | | |
 | ----- | ----- |
-|_ clip.txt_ |text file of clippings|
-|_ descq_ |Linux executable|
-|_ hist.txt_ |text file of search history|
-|_ serv.txt_ |text file of $ commands and special querys|
-|_ winmet.txt_ |window geometry ...|
-|_ editor.txt_ |name of your text editor program|
-|_ urls.txt_ |text file of saved URLs|
-|_ search.txt_ |querystring to search with you favorite search engine|
+|_clip.txt_ |text file of clippings|
+|_descq_ |Linux executable|
+|_hist.txt_ |text file of search history|
+|_serv.txt_ |text file of $ commands and special querys|
+|_winmet.txt_ |window geometry ...|
+|_editor.txt_ |name of your text editor program|
+|_urls.txt_ |text file of saved URLs|
+|_search.txt_ |querystring to search with you favorite search engine|
 
 
 #### end
