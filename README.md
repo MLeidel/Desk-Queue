@@ -204,10 +204,10 @@ The entries in _serv.txt_ take two forms:
  ```
 Use like this:
 
-**a:**mini computers  
-**i:**wallpaper for Linux Mint  
-**p:**preg_split  
-**m:**arlington, tx  
+>a:mini computers  
+i:wallpaper for Linux Mint  
+p:preg_split  
+m:arlington, tx  
 
 Note that what ever you enter after __letter:__ will get
 appended to the website querystring that you've set up
